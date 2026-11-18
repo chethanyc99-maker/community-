@@ -7,20 +7,37 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from pathlib import Path
 
+from urllib.parse import urlparse
+
 # Load environment configuration
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=True)
 
 # ==============================================================================
-# DATABASE CONFIGURATION - Local MySQL Server / Cloud Managed MySQL
-# Seamlessly reads cloud environment variables, defaulting to local MySQL80
+# DATABASE CONFIGURATION - Local MySQL Server / Cloud Managed MySQL (Aiven)
+# Supports individual environment variables OR a unified Aiven Service URI
 # ==============================================================================
+_db_url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL")
+if _db_url:
+    _parsed = urlparse(_db_url)
+    _host = _parsed.hostname or "localhost"
+    _port = _parsed.port or 3306
+    _user = _parsed.username or "root"
+    _password = _parsed.password or "C1h2e3t4h5a6n7@"
+    _db = _parsed.path.lstrip("/") if _parsed.path and len(_parsed.path) > 1 else "computer_based_learning"
+else:
+    _host = os.getenv("MYSQL_HOST", "localhost")
+    _port = int(os.getenv("MYSQL_PORT", 3306))
+    _user = os.getenv("MYSQL_USER", "root")
+    _password = os.getenv("MYSQL_PASSWORD", "C1h2e3t4h5a6n7@")
+    _db = os.getenv("MYSQL_DB", "computer_based_learning")
+
 DB_CONFIG = {
-    "host": os.getenv("MYSQL_HOST", "localhost"),
-    "port": int(os.getenv("MYSQL_PORT", 3306)),
-    "user": os.getenv("MYSQL_USER", "root"),
-    "password": os.getenv("MYSQL_PASSWORD", "C1h2e3t4h5a6n7@"),
-    "database": os.getenv("MYSQL_DB", "computer_based_learning")
+    "host": _host,
+    "port": _port,
+    "user": _user,
+    "password": _password,
+    "database": _db
 }
 
 def _resolve_connection_passwords():
@@ -45,12 +62,15 @@ def get_server_connection():
     last_error = None
     for pwd in _resolve_connection_passwords():
         try:
-            conn = mysql.connector.connect(
-                host=host,
-                port=port,
-                user=user,
-                password=pwd
-            )
+            connect_kwargs = {
+                "host": host,
+                "port": port,
+                "user": user,
+                "password": pwd
+            }
+            if host not in ("localhost", "127.0.0.1"):
+                connect_kwargs["ssl_disabled"] = False
+            conn = mysql.connector.connect(**connect_kwargs)
             return conn
         except Error as e:
             last_error = e
@@ -68,13 +88,16 @@ def get_db_connection():
     last_error = None
     for pwd in _resolve_connection_passwords():
         try:
-            conn = mysql.connector.connect(
-                host=host,
-                port=port,
-                user=user,
-                password=pwd,
-                database=db_name
-            )
+            connect_kwargs = {
+                "host": host,
+                "port": port,
+                "user": user,
+                "password": pwd,
+                "database": db_name
+            }
+            if host not in ("localhost", "127.0.0.1"):
+                connect_kwargs["ssl_disabled"] = False
+            conn = mysql.connector.connect(**connect_kwargs)
             return conn
         except Error as e:
             last_error = e
@@ -87,24 +110,27 @@ def init_db():
     Initializes MySQL database, creates users table, and seeds sample accounts.
     """
     db_name = DB_CONFIG.get("database", "computer_based_learning")
-    server_conn = get_server_connection()
-    if not server_conn:
-        print(f"[WARNING] MySQL Server connection failed. Ensure MySQL service (MySQL80) is running on {DB_CONFIG.get('host')}:{DB_CONFIG.get('port')}.")
-        return False
+    host = DB_CONFIG.get("host", "localhost")
 
-    try:
-        cursor = server_conn.cursor()
-        cursor.execute(
-            f"CREATE DATABASE IF NOT EXISTS `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-        )
-        cursor.close()
-        server_conn.close()
-    except Error as e:
-        print(f"[ERROR] Failed to create database `{db_name}`: {e}")
-        return False
-
+    # Try connecting directly to the database first (essential for managed cloud MySQL like Aiven)
     db_conn = get_db_connection()
+    if not db_conn and host in ("localhost", "127.0.0.1"):
+        server_conn = get_server_connection()
+        if server_conn:
+            try:
+                cursor = server_conn.cursor()
+                cursor.execute(
+                    f"CREATE DATABASE IF NOT EXISTS `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+                )
+                cursor.close()
+                server_conn.close()
+                db_conn = get_db_connection()
+            except Error as e:
+                print(f"[ERROR] Failed to create database `{db_name}`: {e}")
+                return False
+
     if not db_conn:
+        print(f"[WARNING] Database connection failed. Verify credentials for database '{db_name}' on {host}:{DB_CONFIG.get('port')}.")
         return False
 
     try:
