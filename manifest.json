@@ -1,0 +1,19 @@
+{
+  "name": "Prerana | Special Education Assistive Learning",
+  "short_name": "Prerana",
+  "description": "Multi-sensory computer-assisted learning tool for special education, neurodivergent learners, and IEP tracking.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F0F4F8",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234F46E5'/><text x='50%' y='68%' font-size='60' text-anchor='middle'>🌱</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

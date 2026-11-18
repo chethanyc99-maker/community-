@@ -1,0 +1,795 @@
+/* ==========================================================================
+   Prerana Liquid Glass Button System
+   Ultra-Transparent iOS 27 Inspired Liquid Crystal Pill Buttons
+   85–95% visual transparency, crystal-clear convex surface, razor-thin edge reflections.
+   Applied ONLY to buttons and selected segmented navigation controls.
+   ========================================================================== */
+
+:root {
+  /* Core Optical & Physical Parameters */
+  --lgb-transparency: 0.90;             /* Design target: 85-95% visual transparency */
+  --lgb-blur: 5px;                      /* Crisp optical refraction; never heavy milky blur */
+  --lgb-border-brightness: rgba(255, 255, 255, 0.78);
+  --lgb-border-hover: rgba(255, 255, 255, 0.98);
+  --lgb-reflection-intensity: 0.75;     /* Meniscus specular arc highlight */
+  --lgb-blue-glow: rgba(37, 99, 235, 0.12);
+  --lgb-blue-glow-hover: rgba(59, 130, 246, 0.22);
+  --lgb-height: 48px;
+  --lgb-radius: 9999px;
+  --lgb-hover-speed: 0.24s;
+  --lgb-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lgb-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Transparent Crystal Body (85-95% transparent; background completely shows through) */
+  --lgb-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(224, 242, 254, 0.10) 35%,
+    rgba(59, 130, 246, 0.08) 70%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  --lgb-bg-hover: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.44) 0%,
+    rgba(224, 242, 254, 0.20) 35%,
+    rgba(59, 130, 246, 0.14) 70%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  --lgb-bg-active: linear-gradient(
+    165deg,
+    rgba(219, 234, 254, 0.35) 0%,
+    rgba(59, 130, 246, 0.20) 55%,
+    rgba(37, 99, 235, 0.16) 100%
+  );
+}
+
+/* ==========================================================================
+   Base Ultra-Transparent Liquid Glass Button (.liquid-btn)
+   ========================================================================== */
+.liquid-btn,
+button.liquid-btn,
+.btn.liquid-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: var(--lgb-height);
+  padding: 0.68rem 1.65rem;
+  border-radius: var(--lgb-radius);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #0A2868;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid var(--lgb-border-brightness);
+  background: var(--lgb-bg);
+  backdrop-filter: blur(var(--lgb-blur)) saturate(135%) brightness(103%);
+  -webkit-backdrop-filter: blur(var(--lgb-blur)) saturate(135%) brightness(103%);
+  box-shadow:
+    0 2px 8px -1px rgba(15, 23, 42, 0.05),
+    0 8px 24px -4px rgba(37, 99, 235, 0.10),
+    0 0 16px var(--lgb-blue-glow),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.96),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1.5px 3px 0 rgba(37, 99, 235, 0.22);
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+  isolation: isolate;
+  outline: none;
+  transition:
+    background var(--lgb-hover-speed) var(--lgb-ease),
+    border-color var(--lgb-hover-speed) var(--lgb-ease),
+    box-shadow var(--lgb-hover-speed) var(--lgb-ease),
+    transform var(--lgb-hover-speed) var(--lgb-spring),
+    color var(--lgb-hover-speed) var(--lgb-ease);
+}
+
+/* Ensure text and icon elements remain crisp above optical layers */
+.liquid-btn > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* Curved Upper Crystal Edge Reflection (Convex Meniscus Highlight) */
+.liquid-btn::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 6px;
+  right: 6px;
+  height: 48%;
+  border-radius: var(--lgb-radius);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, var(--lgb-reflection-intensity)) 0%,
+    rgba(255, 255, 255, 0.20) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--lgb-hover-speed) var(--lgb-ease);
+}
+
+/* Specular Light Sweep Animation on Hover */
+.liquid-btn::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -95%;
+  width: 50%;
+  height: 220%;
+  background: linear-gradient(
+    108deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 30%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.08) 70%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: left 0.52s var(--lgb-ease), opacity 0.25s ease;
+}
+
+/* Hover Interaction: increased edge illumination and subtle reflective light movement */
+.liquid-btn:hover {
+  background: var(--lgb-bg-hover);
+  border-color: var(--lgb-border-hover);
+  color: #061D4E;
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.07),
+    0 10px 28px -4px rgba(37, 99, 235, 0.16),
+    0 0 22px var(--lgb-blue-glow-hover),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1.0),
+    inset 1px 0 2.5px 0 rgba(255, 255, 255, 0.60),
+    inset -1px 0 2.5px 0 rgba(255, 255, 255, 0.60),
+    inset 0 -1.5px 4px 0 rgba(37, 99, 235, 0.30);
+  transform: translateY(-2px);
+}
+
+.liquid-btn:hover::after {
+  left: 135%;
+  opacity: 1;
+}
+
+/* Click Interaction: gentle compression and crystal reflection pulse */
+.liquid-btn:active {
+  transform: translateY(1px) scale(0.975);
+  background: var(--lgb-bg-active);
+  box-shadow:
+    0 1px 4px rgba(15, 23, 42, 0.06),
+    0 3px 10px rgba(37, 99, 235, 0.14),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    inset 0 0 14px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 3px rgba(37, 99, 235, 0.24);
+  transition-duration: 0.08s;
+}
+
+/* Accessible Keyboard Focus Ring */
+.liquid-btn:focus-visible,
+.liquid-segmented-control .auth-tab-btn:focus-visible {
+  outline: 3.5px solid #F59E0B;
+  outline-offset: 3px;
+}
+
+/* Disabled State: Reduced optical brightness while maintaining full readability */
+.liquid-btn:disabled,
+.liquid-btn[aria-disabled="true"] {
+  opacity: 0.52;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: saturate(0.5) brightness(0.95);
+  transform: none;
+}
+
+/* ==========================================
+   PRERANA - PREMIUM iOS GLASS LOGIN BUTTON
+========================================== */
+
+.auth-submit,
+.auth-login-btn,
+.liquid-btn-primary {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    width: 100%;
+    min-height: 62px;
+    padding: 16px 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    color: #17345f;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+
+    background: rgba(255, 255, 255, 0.20);
+
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+
+    border: 1px solid rgba(255,255,255,0.75);
+    border-radius: 50px;
+
+    box-shadow:
+        inset 0 1.5px 2px rgba(255,255,255,0.85),
+        inset 0 -1px 2px rgba(255,255,255,0.15),
+        0 8px 25px rgba(30,70,130,0.10);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.3s ease,
+        background 0.3s ease;
+}
+
+/* Curved glass reflection */
+.auth-submit::before,
+.auth-login-btn::before,
+.liquid-btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.55),
+        transparent 42%,
+        rgba(255,255,255,0.12)
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Hover effect */
+.auth-submit:hover,
+.auth-login-btn:hover,
+.liquid-btn-primary:hover {
+    background: rgba(255,255,255,0.32);
+    transform: translateY(-2px);
+
+    box-shadow:
+        inset 0 1px 3px rgba(255,255,255,0.9),
+        0 12px 30px rgba(30,70,130,0.16);
+}
+
+/* Press animation */
+.auth-submit:active,
+.auth-login-btn:active,
+.liquid-btn-primary:active {
+    transform: scale(0.97);
+}
+
+/* Keyboard accessibility */
+.auth-submit:focus-visible,
+.auth-login-btn:focus-visible,
+.liquid-btn-primary:focus-visible {
+    outline: 3px solid #3478F6;
+    outline-offset: 4px;
+}
+
+/* Secondary Crystal Button (Pure Neutral Crystal Glass) */
+.liquid-btn-secondary,
+.btn-secondary.liquid-btn {
+  color: #1E293B;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.90);
+  --lgb-reflection-intensity: 0.70;
+  --lgb-border-brightness: rgba(255, 255, 255, 0.75);
+  --lgb-border-hover: rgba(255, 255, 255, 0.95);
+  --lgb-blue-glow: rgba(148, 163, 184, 0.10);
+  --lgb-blue-glow-hover: rgba(148, 163, 184, 0.20);
+  --lgb-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.26) 0%,
+    rgba(248, 250, 252, 0.09) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  --lgb-bg-hover: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.40) 0%,
+    rgba(241, 245, 249, 0.18) 50%,
+    rgba(255, 255, 255, 0.25) 100%
+  );
+  box-shadow:
+    0 2px 6px rgba(15, 23, 42, 0.04),
+    0 6px 18px -4px rgba(15, 23, 42, 0.06),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.40),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.40),
+    inset 0 -1.5px 2px 0 rgba(148, 163, 184, 0.18);
+}
+
+.liquid-btn-secondary:hover,
+.btn-secondary.liquid-btn:hover {
+  color: #0F172A;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    0 8px 22px -4px rgba(15, 23, 42, 0.09),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1.0),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.50),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -1.5px 3px 0 rgba(148, 163, 184, 0.24);
+}
+
+/* Success Crystal Button (Subtle Emerald Refraction) */
+.liquid-btn-success,
+.btn-success.liquid-btn {
+  color: #065F46;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.90);
+  --lgb-border-brightness: rgba(167, 243, 208, 0.85);
+  --lgb-border-hover: rgba(209, 250, 229, 0.98);
+  --lgb-blue-glow: rgba(16, 185, 129, 0.12);
+  --lgb-blue-glow-hover: rgba(16, 185, 129, 0.24);
+  --lgb-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(209, 250, 229, 0.12) 40%,
+    rgba(16, 185, 129, 0.07) 80%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  --lgb-bg-hover: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(209, 250, 229, 0.20) 40%,
+    rgba(16, 185, 129, 0.14) 80%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  box-shadow:
+    0 2px 8px rgba(16, 185, 129, 0.08),
+    0 8px 22px -4px rgba(16, 185, 129, 0.12),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.96),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1.5px 3px 0 rgba(16, 185, 129, 0.25);
+}
+
+/* Warning Crystal Button (Subtle Amber Refraction) */
+.liquid-btn-warning {
+  color: #92400E;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.90);
+  --lgb-border-brightness: rgba(253, 230, 138, 0.85);
+  --lgb-border-hover: rgba(254, 243, 199, 0.98);
+  --lgb-blue-glow: rgba(245, 158, 11, 0.12);
+  --lgb-blue-glow-hover: rgba(245, 158, 11, 0.24);
+  --lgb-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(254, 243, 199, 0.14) 40%,
+    rgba(245, 158, 11, 0.08) 80%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  --lgb-bg-hover: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(254, 243, 199, 0.22) 40%,
+    rgba(245, 158, 11, 0.15) 80%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  box-shadow:
+    0 2px 8px rgba(245, 158, 11, 0.08),
+    0 8px 22px -4px rgba(245, 158, 11, 0.12),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.96),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1.5px 3px 0 rgba(245, 158, 11, 0.25);
+}
+
+/* Danger Crystal Button (Subtle Ruby Refraction) */
+.liquid-btn-danger,
+.btn-danger.liquid-btn {
+  color: #991B1B;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.90);
+  --lgb-border-brightness: rgba(254, 202, 202, 0.85);
+  --lgb-border-hover: rgba(254, 226, 226, 0.98);
+  --lgb-blue-glow: rgba(239, 68, 68, 0.12);
+  --lgb-blue-glow-hover: rgba(239, 68, 68, 0.24);
+  --lgb-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(254, 226, 226, 0.14) 40%,
+    rgba(239, 68, 68, 0.08) 80%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  --lgb-bg-hover: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(254, 226, 226, 0.22) 40%,
+    rgba(239, 68, 68, 0.15) 80%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  box-shadow:
+    0 2px 8px rgba(239, 68, 68, 0.08),
+    0 8px 22px -4px rgba(239, 68, 68, 0.12),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.96),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1.5px 3px 0 rgba(239, 68, 68, 0.25);
+}
+
+/* ==========================================================================
+   Icon & Size Modifiers
+   ========================================================================== */
+.liquid-btn-icon,
+.speaker-icon-btn.liquid-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.45rem 0.75rem;
+  font-size: 1.25rem;
+}
+
+.liquid-btn-sm,
+.btn-sm.liquid-btn {
+  min-height: 38px;
+  padding: 0.42rem 1.05rem;
+  font-size: 0.9rem;
+}
+
+.liquid-btn-lg,
+.btn-large.liquid-btn,
+.btn-lg.liquid-btn {
+  min-height: 54px;
+  padding: 0.85rem 2.15rem;
+  font-size: 1.12rem;
+}
+
+.liquid-btn-huge,
+.btn-huge.liquid-btn {
+  min-height: 60px;
+  padding: 1rem 2.5rem;
+  font-size: 1.25rem;
+}
+
+/* ==========================================================================
+   Active / Selected State (Subtle Illuminated Glass Indicator, Non-Opaque)
+   ========================================================================== */
+.liquid-btn-active,
+.liquid-btn.active,
+.liquid-btn[aria-pressed="true"],
+.liquid-btn-secondary.active,
+.liquid-btn-secondary.liquid-btn-active,
+.home-diff-pill.liquid-btn.active,
+.diff-pill-btn.liquid-btn.active,
+.dash-feature-btn.liquid-btn.active,
+.cat-pill.liquid-btn.active,
+.subtab-btn.liquid-btn.active,
+.size-chip-btn.liquid-btn.active,
+.sidebar-nav-btn.liquid-btn.active,
+button.icon-control-btn.liquid-btn.active {
+  color: #082362 !important;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+  --lgb-reflection-intensity: 0.85;
+  border-color: rgba(255, 255, 255, 0.98) !important;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(219, 234, 254, 0.22) 40%,
+    rgba(147, 197, 253, 0.16) 75%,
+    rgba(255, 255, 255, 0.30) 100%
+  ) !important;
+  box-shadow:
+    0 0 0 2.5px rgba(59, 130, 246, 0.35),
+    0 4px 14px -2px rgba(37, 99, 235, 0.18),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1.0),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.60),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.60),
+    inset 0 -2px 4px 0 rgba(37, 99, 235, 0.26) !important;
+}
+
+/* Non-color indicator mark on selected level & navigation pills */
+.home-diff-pill.liquid-btn.active::after,
+.diff-pill-btn.liquid-btn.active::after,
+.subtab-btn.liquid-btn.active::after,
+.size-chip-btn.liquid-btn.active::after {
+  content: '✓';
+  position: static;
+  width: auto;
+  height: auto;
+  transform: none;
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  border-radius: 999px;
+  padding: 0 0.38rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  font-weight: 900;
+  color: #0A2868;
+  opacity: 1;
+  margin-left: 0.22rem;
+  z-index: 3;
+}
+
+/* Ensure Liquid Glass styling wins cleanly over legacy card-specific or control styles in main.css */
+.activity-card .card-play-tag.liquid-btn,
+.activity-card .card-play-tag.liquid-btn-primary {
+  min-height: 36px;
+  padding: 0.42rem 1.25rem;
+  font-size: 0.94rem;
+  border-radius: var(--lgb-radius);
+  background: var(--lgb-bg);
+  color: #0A2868 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.90);
+  border: 1px solid var(--lgb-border-brightness);
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.05),
+    0 0 16px var(--lgb-blue-glow),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px 0 rgba(37, 99, 235, 0.20);
+}
+
+.activity-card:hover .card-play-tag.liquid-btn {
+  background: var(--lgb-bg-hover);
+  color: #061D4E !important;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 0 20px var(--lgb-blue-glow-hover),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1.5px 3px 0 rgba(37, 99, 235, 0.28);
+}
+
+.sidebar-nav-btn.liquid-btn {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.58rem 1.15rem;
+  border-radius: var(--lgb-radius);
+}
+
+.home-diff-pill.liquid-btn,
+.diff-pill-btn.liquid-btn,
+.subtab-btn.liquid-btn,
+.size-chip-btn.liquid-btn,
+.rhyme-play-btn.liquid-btn {
+  border-radius: var(--lgb-radius);
+  min-height: 40px;
+  padding: 0.45rem 1.05rem;
+}
+
+.sign-out-btn.liquid-btn-danger {
+  border-radius: var(--lgb-radius);
+  min-height: 40px;
+  padding: 0.45rem 1.15rem;
+}
+
+.speaker-icon-btn.liquid-btn {
+  border-radius: var(--lgb-radius);
+}
+
+.speaker-icon-btn.liquid-btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-home.liquid-btn,
+.btn-listen-prompt.liquid-btn {
+  min-height: 44px;
+  padding: 0.5rem 1.35rem;
+}
+
+.keypad-btn.liquid-btn {
+  min-width: 70px;
+  min-height: 70px;
+  padding: 0;
+  border-radius: 9999px;
+}
+
+/* ==========================================================================
+   Liquid Segmented Control (Student / Teacher / Admin Sliding Crystal Selector)
+   ========================================================================== */
+.liquid-segmented-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  gap: 0;
+  border-radius: var(--lgb-radius);
+  background: rgba(241, 245, 249, 0.40);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    inset 0 1px 3px rgba(30, 64, 175, 0.06),
+    0 4px 14px rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(var(--lgb-blur)) saturate(130%);
+  -webkit-backdrop-filter: blur(var(--lgb-blur)) saturate(130%);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Smooth Sliding Transparent Crystal Capsule Indicator */
+.liquid-segmented-control .liquid-segment-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  width: 33.333%;
+  border-radius: var(--lgb-radius);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.46) 0%,
+    rgba(219, 234, 254, 0.22) 45%,
+    rgba(147, 197, 253, 0.14) 80%,
+    rgba(255, 255, 255, 0.32) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(var(--lgb-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--lgb-blur)) saturate(140%);
+  box-shadow:
+    0 2px 10px rgba(37, 99, 235, 0.12),
+    0 6px 16px -4px rgba(15, 23, 42, 0.08),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1.5px 3px 0 rgba(59, 130, 246, 0.22),
+    inset 1px 0 2px 0 rgba(255, 255, 255, 0.50),
+    inset -1px 0 2px 0 rgba(255, 255, 255, 0.50);
+  transition:
+    transform 0.36s var(--lgb-spring),
+    width 0.30s var(--lgb-ease);
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform, width;
+}
+
+.liquid-segmented-control .liquid-segment-indicator::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 6px;
+  right: 6px;
+  height: 48%;
+  border-radius: var(--lgb-radius);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.liquid-segmented-control .auth-tab-btn {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #475569;
+  background: transparent;
+  border: none;
+  border-radius: var(--lgb-radius);
+  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  transition: color 0.22s ease, transform 0.2s ease;
+}
+
+.liquid-segmented-control .auth-tab-btn:hover {
+  color: #0F2960;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.liquid-segmented-control .auth-tab-btn.active {
+  color: #082362;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+  background: transparent;
+  box-shadow: none;
+}
+
+.liquid-segmented-control .auth-tab-btn.active::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2563EB;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.6);
+  flex-shrink: 0;
+}
+
+.liquid-segmented-control .auth-tab-btn:focus-visible {
+  outline: 3px solid #F59E0B;
+  outline-offset: -3px;
+}
+
+.liquid-segmented-control .auth-tab-btn .tab-emoji {
+  font-size: 1.2rem;
+}
+
+/* Responsive Segmented Control Stacking Only on Very Narrow Screens */
+@media (max-width: 420px) {
+  .liquid-segmented-control .auth-tab-btn {
+    font-size: 0.88rem;
+    padding: 0.55rem 0.4rem;
+    gap: 0.25rem;
+  }
+}
+
+/* Override main.css column stacking at <=600px so sliding glass indicator stays horizontal */
+@media (max-width: 600px) {
+  .auth-segmented-nav.liquid-segmented-control {
+    flex-direction: row !important;
+    border-radius: var(--lgb-radius) !important;
+  }
+}
+
+/* ==========================================================================
+   Accessibility: Reduced Motion & WCAG AAA High Contrast Overrides
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-btn,
+  .liquid-btn::before,
+  .liquid-btn::after,
+  .liquid-segmented-control .liquid-segment-indicator,
+  .liquid-segmented-control .auth-tab-btn {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
+  .liquid-btn:hover::after {
+    opacity: 0 !important;
+  }
+}
+
+body.theme-high-contrast .liquid-btn,
+body.theme-high-contrast button.liquid-btn {
+  background: #000000 !important;
+  color: #00FFFF !important;
+  border: 2px solid #00FFFF !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.theme-high-contrast .liquid-btn::before,
+body.theme-high-contrast .liquid-btn::after {
+  display: none !important;
+}
+
+body.theme-high-contrast .liquid-btn.active,
+body.theme-high-contrast .liquid-btn-active,
+body.theme-high-contrast .liquid-btn-primary {
+  background: #FFFF00 !important;
+  color: #000000 !important;
+  border: 2px solid #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+body.theme-high-contrast .liquid-segmented-control {
+  background: #000000 !important;
+  border: 2px solid #FFFF00 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.theme-high-contrast .liquid-segmented-control .auth-tab-btn {
+  color: #00FFFF !important;
+}
+
+body.theme-high-contrast .liquid-segmented-control .auth-tab-btn.active {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+body.theme-high-contrast .liquid-segment-indicator {
+  background: #FFFF00 !important;
+  border-color: #FFFFFF !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

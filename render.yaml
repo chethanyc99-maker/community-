@@ -1,0 +1,43 @@
+services:
+  # Prerana Web Application Service
+  - type: web
+    name: prerana-assistive-platform
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --config gunicorn_config.py
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MYSQL_HOST
+        fromDatabase:
+          name: prerana-db
+          property: host
+      - key: MYSQL_USER
+        fromDatabase:
+          name: prerana-db
+          property: user
+      - key: MYSQL_PASSWORD
+        fromDatabase:
+          name: prerana-db
+          property: password
+      - key: MYSQL_DB
+        fromDatabase:
+          name: prerana-db
+          property: database
+      - key: MYSQL_PORT
+        fromDatabase:
+          name: prerana-db
+          property: port
+
+databases:
+  # Managed Cloud MySQL Service
+  - name: prerana-db
+    databaseName: computer_based_learning
+    user: prerana_admin
+    plan: free
+    region: oregon

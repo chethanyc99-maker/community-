@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Prerana | Assistive Learning Tool for Special Education</title>
+  <meta name="description" content="A multi-sensory assistive learning tool for special education with separate Student and Teacher login portals and IEP tracking.">
+  
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Prerana">
+
+  <link rel="stylesheet" href="styles/main.css?v=10">
+  <link rel="stylesheet" href="styles/liquid-glass-buttons.css?v=2">
+  <style>
+    .hidden,
+    body.auth-locked .top-nav,
+    body.auth-locked #app-top-header {
+      display: none !important;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=OpenDyslexic&display=swap" rel="stylesheet">
+</head>
+<body class="theme-calm font-standard auth-locked">
+
+  <!-- =====================================================================
+       Top Navigation Bar
+       (Hidden while on the Login / Create Account screen; revealed after sign-in)
+       ===================================================================== -->
+  <header class="top-nav glass-navbar glass-panel hidden" id="app-top-header" role="banner">
+    <!-- Left Header Group: Clean 3-Line Hamburger Menu Toggle + Brand Logo -->
+    <div class="header-left-group">
+      <!-- Clean 3-line Hamburger Menu Toggle Button -->
+      <button type="button" class="nav-hamburger-btn" id="btn-nav-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu-drawer" title="Open menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+
+      <!-- Brand Logo & Title on the Far Left -->
+      <div class="brand-badge" id="btn-brand-home" role="button" tabindex="0" title="Go to Home Screen">
+        <span class="brand-mascot">🌱</span>
+        <div class="brand-text-wrap">
+          <span class="brand-title">Prerana</span>
+          <span class="brand-sub">Assistive Learning</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Right Controls: Grouped Profile Pill + Utility Controls -->
+    <div class="header-right-group">
+      <!-- Student Status Area (Compact Profile Pill) -->
+      <div class="student-status-area header-profile-pill hidden" id="header-student-status">
+        <button id="btn-change-avatar" class="avatar-pill glass-pill" title="Tap to change your friendly mascot">
+          <span class="avatar-icon" id="student-avatar-icon">🌟</span>
+          <span class="student-name-text" id="display-student-name">Arjun Kumar</span>
+        </button>
+
+        <div id="network-pill" class="network-indicator glass-pill online" title="Network Connection Status">
+          <span class="net-dot">🟢</span>
+          <span class="net-label" id="network-label">Online</span>
+        </div>
+
+        <div class="stars-pill glass-pill" aria-label="Stars Earned" title="Stars Earned">
+          <span class="star-icon">⭐</span>
+          <span class="star-num" id="star-count">17</span>
+        </div>
+      </div>
+
+      <!-- Teacher Status Area (Visible when teacher is active) -->
+      <div class="teacher-status-area hidden" id="header-teacher-status">
+        <span class="glass-pill teacher-badge">👩‍🏫 Special Educator Dashboard</span>
+        <button id="btn-teacher-switch-student" class="btn btn-secondary btn-sm liquid-btn liquid-btn-secondary liquid-btn-sm">
+          🎮 Student Game View
+        </button>
+      </div>
+
+      <!-- Quick Utility Controls (Voice, Contrast, Sign Out, Language) -->
+      <div class="top-controls">
+        <!-- Language Selector -->
+        <select id="select-app-language" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm" title="Change Language / ಭಾಷೆ ಬದಲಾಯಿಸಿ / भाषा बदलें" aria-label="Change Language" style="cursor: pointer; font-weight: 700; padding: 0.35rem 0.55rem; font-size: 0.8rem;">
+          <option value="en">🌐 English</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
+
+        <!-- Voice Guidance Toggle -->
+        <button id="btn-toggle-tts" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm active" title="Voice Guidance (On/Off)" aria-pressed="true">
+          <span class="ctrl-icon">🔊</span>
+          <span class="ctrl-text">Voice</span>
+        </button>
+
+        <!-- High Contrast Toggle -->
+        <button id="btn-toggle-contrast" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm" title="High Contrast Mode" aria-pressed="false">
+          <span class="ctrl-icon">🌓</span>
+          <span class="ctrl-text">Contrast</span>
+        </button>
+
+        <!-- Dedicated Sign Out Button (Visible only when logged in) -->
+        <button id="btn-sign-out" class="sign-out-btn liquid-btn liquid-btn-danger liquid-btn-sm hidden" title="Sign Out of Account">
+          <span class="ctrl-icon">🚪</span>
+          <span class="ctrl-text">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       Slide-out Navigation Menu Drawer & Soft Backdrop Overlay
+       ===================================================================== -->
+  <div id="nav-drawer-backdrop" class="nav-drawer-backdrop" aria-hidden="true"></div>
+
+  <nav id="nav-menu-drawer" class="nav-menu-drawer" aria-label="Navigation Menu" aria-hidden="true">
+    <div class="nav-drawer-header">
+      <div class="nav-drawer-brand">
+        <span class="drawer-brand-icon">🌱</span>
+        <div class="drawer-brand-text">
+          <span class="drawer-brand-title">Prerana</span>
+          <span class="drawer-brand-subtitle">Navigation</span>
+        </div>
+      </div>
+      <button type="button" id="btn-close-nav-drawer" class="nav-drawer-close-btn" aria-label="Close menu" title="Close menu">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <div class="nav-drawer-body">
+      <div class="nav-drawer-items" role="tablist" aria-label="Dashboard Navigation">
+        <!-- 1. View Activities -->
+        <button type="button" class="dash-feature-btn drawer-nav-item active" data-dash-tab="activities" role="tab" aria-selected="true">
+          <span class="drawer-item-icon">🎮</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">View Activities</span>
+            <span class="drawer-item-sub">Play &amp; learn</span>
+          </div>
+        </button>
+
+        <!-- 2. My Profile -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="profile" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">👤</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">My Profile</span>
+            <span class="drawer-item-sub">Avatar &amp; info</span>
+          </div>
+        </button>
+
+        <!-- 3. View Achievements -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="achievements" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">🏆</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">View Achievements</span>
+            <span class="drawer-item-sub">Badges &amp; stars</span>
+          </div>
+        </button>
+
+        <!-- 4. My Progress -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="progress" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">📊</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">My Progress</span>
+            <span class="drawer-item-sub">Weekly milestones</span>
+          </div>
+        </button>
+
+        <!-- 5. Daily Rewards -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="rewards" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">🎁<span id="reward-dot" class="reward-alert-dot hidden">!</span></span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">Daily Rewards</span>
+            <span class="drawer-item-sub">Claim daily gift</span>
+          </div>
+        </button>
+
+        <!-- 6. Daily Activities -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="daily-plan" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">📅</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">Daily Activities</span>
+            <span class="drawer-item-sub">Daily game plan</span>
+          </div>
+        </button>
+
+        <!-- 7. My Favorites -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="favorites" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">💖</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">My Favorites</span>
+            <span class="drawer-item-sub">Saved games</span>
+          </div>
+        </button>
+
+        <!-- 8. Accessibility Settings -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="settings" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">⚙️</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">Accessibility Settings</span>
+            <span class="drawer-item-sub">Sound &amp; contrast</span>
+          </div>
+        </button>
+
+        <!-- Educator Shortcut Button (Preserved for teacher mode) -->
+        <button type="button" id="btn-dash-teacher-shortcut" class="dash-feature-btn drawer-nav-item drawer-nav-teacher hidden" data-dash-tab="teacher">
+          <span class="drawer-item-icon">👩‍🏫</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">Teacher Dashboard</span>
+            <span class="drawer-item-sub">Educator view</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       Main Content Container
+       Content is GATED behind authentication.
+       Only #view-auth is visible until a student or teacher signs in.
+       ===================================================================== -->
+  <main class="app-main">
+
+    <!-- =====================================================================
+         VIEW 0: GATED AUTHENTICATION & REGISTRATION SCREEN
+         Header bar is removed while unauthenticated.
+         ===================================================================== -->
+    <section id="view-auth" class="view-section active" aria-label="Sign In or Register">
+      <div class="auth-wrapper">
+        <div class="auth-card glass-panel glass-card">
+
+          <!-- Alert / Feedback Notification Box -->
+          <div id="auth-alert-box" class="auth-alert hidden" role="alert"></div>
+
+          <!-- ===============================================================
+               MODE A: SIGN IN PORTAL (Student / Teacher / Admin)
+               (Rendered when isLoginMode is true)
+               =============================================================== -->
+          <div id="auth-login-container">
+            <div class="auth-header">
+              <div class="auth-brand-badge">🌱</div>
+              <h1 class="auth-main-title">Welcome Back!</h1>
+              <p class="auth-sub-title">Sign in to continue your learning journey.</p>
+            </div>
+
+            <!-- Segmented Role Switcher: Student / Teacher / Admin -->
+            <div class="auth-segmented-nav liquid-segmented-control" role="tablist">
+              <div class="liquid-segment-indicator" id="auth-segment-indicator"></div>
+              <button class="auth-tab-btn active" id="tab-btn-student" role="tab" aria-selected="true" data-tab="student">
+                <span class="tab-text">Student</span>
+              </button>
+              <button class="auth-tab-btn" id="tab-btn-teacher" role="tab" aria-selected="false" data-tab="teacher">
+                <span class="tab-text">Teacher</span>
+              </button>
+              <button class="auth-tab-btn" id="tab-btn-admin" role="tab" aria-selected="false" data-tab="admin">
+                <span class="tab-text">Admin</span>
+              </button>
+            </div>
+
+            <!-- TAB 1: Student Login Panel (Only Student login details) -->
+            <div class="auth-tab-panel active" id="tab-panel-student" role="tabpanel">
+              <!-- Student Login Mode Toggle: Password vs Picture Login -->
+              <div class="student-login-mode-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; background: #EEF2FF; padding: 4px; border-radius: 14px;">
+                <button type="button" id="btn-mode-standard-login" class="liquid-btn liquid-btn-sm active" style="flex: 1; padding: 6px; font-size: 0.82rem; border-radius: 10px;">🔑 Password Login</button>
+                <button type="button" id="btn-mode-picture-login" class="liquid-btn liquid-btn-sm" style="flex: 1; padding: 6px; font-size: 0.82rem; border-radius: 10px; background: transparent; color: #4338CA;">🎨 Picture Login</button>
+              </div>
+
+              <!-- Standard Password Form -->
+              <form id="form-student-login" class="auth-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="login-student-username">Username or Email</label>
+                  <input type="text" id="login-student-username" class="auth-input glass-input" placeholder="Enter your username or email" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="login-student-pin">Password</label>
+                  <div class="input-with-toggle">
+                    <input type="password" id="login-student-pin" class="auth-input glass-input" placeholder="Enter your password" autocomplete="current-password" required>
+                    <button type="button" class="btn-show-hide-pwd" data-target="login-student-pin" aria-label="Show password" title="Show or hide password">👁️</button>
+                  </div>
+                </div>
+
+                <div class="auth-remember-row">
+                  <label class="remember-label">
+                    <input type="checkbox" id="check-remember-student" class="remember-checkbox">
+                    <span>Remember Me</span>
+                  </label>
+                  <a href="#forgot" class="forgot-password-link" data-role="student">Forgot Password?</a>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" id="btn-submit-student-login" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                    <span class="btn-label">Login</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Accessible Picture Login Form (Zero-Typing for Special Needs) -->
+              <form id="form-student-picture-login" class="auth-form hidden" onsubmit="return false;">
+                <div class="form-group" style="text-align: center;">
+                  <label style="display: block; margin-bottom: 0.4rem; font-weight: 700; color: #1E1B4B;">1. Tap Your Friendly Mascot Avatar:</label>
+                  <div class="mascot-selection-grid" id="login-picture-mascots" style="display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
+                    <button type="button" class="btn-picture-mascot active" data-mascot="🌟" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #4F46E5; border-radius: 14px; background: #EEF2FF; cursor: pointer;">🌟</button>
+                    <button type="button" class="btn-picture-mascot" data-mascot="🦁" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🦁</button>
+                    <button type="button" class="btn-picture-mascot" data-mascot="🦋" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🦋</button>
+                    <button type="button" class="btn-picture-mascot" data-mascot="🐰" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐰</button>
+                    <button type="button" class="btn-picture-mascot" data-mascot="🐻" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐻</button>
+                    <button type="button" class="btn-picture-mascot" data-mascot="🐬" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐬</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="text-align: center; margin-top: 0.8rem;">
+                  <label style="display: block; margin-bottom: 0.4rem; font-weight: 700; color: #1E1B4B;">2. Tap Your Favorite Color:</label>
+                  <div class="color-selection-grid" id="login-picture-colors" style="display: flex; justify-content: center; gap: 0.6rem;">
+                    <button type="button" class="btn-picture-color active" data-color="blue" style="width: 36px; height: 36px; border-radius: 50%; background: #3B82F6; border: 3px solid #1E40AF; cursor: pointer;" title="Blue"></button>
+                    <button type="button" class="btn-picture-color" data-color="red" style="width: 36px; height: 36px; border-radius: 50%; background: #EF4444; border: 2px solid #B91C1C; cursor: pointer;" title="Red"></button>
+                    <button type="button" class="btn-picture-color" data-color="green" style="width: 36px; height: 36px; border-radius: 50%; background: #10B981; border: 2px solid #047857; cursor: pointer;" title="Green"></button>
+                    <button type="button" class="btn-picture-color" data-color="yellow" style="width: 36px; height: 36px; border-radius: 50%; background: #F59E0B; border: 2px solid #B45309; cursor: pointer;" title="Yellow"></button>
+                  </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 1rem;">
+                  <button type="button" id="btn-submit-picture-login" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                    <span class="btn-label">🚀 Enter My Learning Game</span>
+                  </button>
+                </div>
+              </form>
+
+              <div class="auth-footer-prompt">
+                <span>Don't have an account?</span>
+                <button type="button" class="link-btn" id="link-goto-register-student">Create New Account ➡️</button>
+              </div>
+            </div>
+
+            <!-- TAB 2: Teacher Login Panel (Only Teacher login details) -->
+            <div class="auth-tab-panel hidden" id="tab-panel-teacher" role="tabpanel">
+              <form id="form-teacher-login" class="auth-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="login-teacher-email">Educator Email or Username</label>
+                  <input type="text" id="login-teacher-email" class="auth-input glass-input" placeholder="Enter educator email or username" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="login-teacher-password">Password</label>
+                  <div class="input-with-toggle">
+                    <input type="password" id="login-teacher-password" class="auth-input glass-input" placeholder="Enter your password" autocomplete="current-password" required>
+                    <button type="button" class="btn-show-hide-pwd" data-target="login-teacher-password" aria-label="Show password" title="Show or hide password">👁️</button>
+                  </div>
+                </div>
+
+                <div class="auth-remember-row">
+                  <label class="remember-label">
+                    <input type="checkbox" id="check-remember-teacher" class="remember-checkbox">
+                    <span>Remember Me</span>
+                  </label>
+                  <a href="#forgot" class="forgot-password-link" data-role="teacher">Forgot Password?</a>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" id="btn-submit-teacher-login" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                    Login to Teacher Portal
+                  </button>
+                </div>
+              </form>
+
+              <div class="auth-footer-prompt">
+                <span>Need an educator account?</span>
+                <button type="button" class="link-btn" id="link-goto-register-teacher">Create New Account ➡️</button>
+              </div>
+            </div>
+
+            <!-- TAB 3: Administrator Login Panel (Only Admin login details) -->
+            <div class="auth-tab-panel hidden" id="tab-panel-admin" role="tabpanel">
+              <form id="form-admin-login" class="auth-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="login-admin-email">Administrator Email or Username</label>
+                  <input type="text" id="login-admin-email" class="auth-input glass-input" placeholder="Enter administrator username or email" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="login-admin-password">Password</label>
+                  <div class="input-with-toggle">
+                    <input type="password" id="login-admin-password" class="auth-input glass-input" placeholder="Enter administrator password" autocomplete="current-password" required>
+                    <button type="button" class="btn-show-hide-pwd" data-target="login-admin-password" aria-label="Show password" title="Show or hide password">👁️</button>
+                  </div>
+                </div>
+
+                <div class="auth-remember-row">
+                  <label class="remember-label">
+                    <input type="checkbox" id="check-remember-admin" class="remember-checkbox">
+                    <span>Remember Me</span>
+                  </label>
+                  <a href="#forgot" class="forgot-password-link" data-role="admin">Forgot Password?</a>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" id="btn-submit-admin-login" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                    🛡️ Login as Administrator
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- ===============================================================
+               MODE B: CREATE ACCOUNT SECTION ONLY (Hides all login portals)
+               (Rendered when isLoginMode is false)
+               =============================================================== -->
+          <div id="auth-register-container" class="hidden">
+            <div class="auth-header">
+              <div class="auth-brand-badge">✨</div>
+              <h1 class="auth-main-title">Create Account</h1>
+              <p class="auth-sub-title">Enter your details below to create your account.</p>
+            </div>
+
+            <div class="auth-tab-panel active" id="tab-panel-register" role="tabpanel">
+
+              <!-- Account Type Selector -->
+              <div class="reg-role-toggle glass-card">
+                <span class="reg-role-label">Create account for:</span>
+                <div class="reg-role-options">
+                  <button type="button" class="reg-role-btn liquid-btn liquid-btn-secondary liquid-btn-active active" id="btn-reg-select-student">
+                    🎒 Student
+                  </button>
+                  <button type="button" class="reg-role-btn liquid-btn liquid-btn-secondary" id="btn-reg-select-teacher">
+                    👩‍🏫 Teacher
+                  </button>
+                </div>
+              </div>
+
+              <!-- Student Registration Form -->
+              <form id="form-register-student" class="auth-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="reg-student-name">Student Full Name</label>
+                  <input type="text" id="reg-student-name" class="auth-input glass-input" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-student-username">Username</label>
+                  <input type="text" id="reg-student-username" class="auth-input glass-input" placeholder="Choose a username (min 3 characters)" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                  <label>Choose Mascot Avatar</label>
+                  <div class="avatar-palette glass-card" id="reg-avatar-palette">
+                    <button type="button" class="reg-avatar-opt selected" data-avatar="🌟">🌟</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🦁">🦁</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🐻">🐻</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🦋">🦋</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🐰">🐰</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🐬">🐬</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🚀">🚀</button>
+                    <button type="button" class="reg-avatar-opt" data-avatar="🌈">🌈</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-student-level">Cognitive Support Level</label>
+                  <select id="reg-student-level" class="auth-input glass-input glass-dropdown">
+                    <option value="mild">Mild Support (4 choices, standard pace)</option>
+                    <option value="moderate" selected>Moderate Support (3 choices, enhanced audiovisual cues)</option>
+                    <option value="high">High / Intensive Support (2 large choices, maximum contrast)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-student-disability">Learning Support Notes (Optional)</label>
+                  <input type="text" id="reg-student-disability" class="auth-input glass-input" placeholder="e.g. Intellectual & Developmental Delay">
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-student-pin">Create Password</label>
+                  <div class="input-with-toggle">
+                    <input type="password" id="reg-student-pin" class="auth-input glass-input" placeholder="Create password (min 4 characters)" autocomplete="new-password" required>
+                    <button type="button" class="btn-show-hide-pwd" data-target="reg-student-pin" aria-label="Show password" title="Show or hide password">👁️</button>
+                  </div>
+                </div>
+
+                <button type="submit" id="btn-submit-reg-student" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                  🎉 Create Student Account
+                </button>
+              </form>
+
+              <!-- Teacher Registration Form -->
+              <form id="form-register-teacher" class="auth-form hidden" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="reg-teacher-name">Educator Full Name</label>
+                  <input type="text" id="reg-teacher-name" class="auth-input glass-input" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-teacher-email">Email Address</label>
+                  <input type="email" id="reg-teacher-email" class="auth-input glass-input" placeholder="Enter your school or work email" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-teacher-spec">Department / Specialization</label>
+                  <input type="text" id="reg-teacher-spec" class="auth-input glass-input" placeholder="e.g. Special Education" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="reg-teacher-pass">Create Password</label>
+                  <div class="input-with-toggle">
+                    <input type="password" id="reg-teacher-pass" class="auth-input glass-input" placeholder="Create password (min 4 characters)" autocomplete="new-password" required>
+                    <button type="button" class="btn-show-hide-pwd" data-target="reg-teacher-pass" aria-label="Show password" title="Show or hide password">👁️</button>
+                  </div>
+                </div>
+
+                <button type="submit" id="btn-submit-reg-teacher" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+                  👩‍🏫 Create Educator Account
+                </button>
+              </form>
+
+              <div class="auth-footer-prompt">
+                <span>Already have an account?</span>
+                <button type="button" class="link-btn" id="link-goto-login">← Back to Sign In</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: Student Learning Games Hub (GATED: Hidden until authenticated) -->
+    <section id="view-home" class="view-section hidden" aria-label="Choose an Activity">
+      
+      <!-- Educator Preview Banner (Visible when educator is previewing student view) -->
+      <div id="educator-preview-banner" class="preview-banner glass-panel hidden">
+        <span>👩‍🏫 Educator Preview Mode: You are previewing the student interface.</span>
+        <button id="btn-return-educator-dash" class="btn btn-secondary btn-sm liquid-btn liquid-btn-secondary liquid-btn-sm">
+          🔙 Return to Educator Dashboard
+        </button>
+      </div>
+
+      <!-- 2. Hero Welcome & Stats Banner -->
+      <div class="welcome-banner home-hero-container glass-panel glass-card">
+        <div class="home-hero-grid">
+          <!-- Left: Friendly Greeting & Difficulty Selector Segmented Control -->
+          <div class="home-hero-main">
+            <div class="welcome-header-wrap">
+              <span class="welcome-badge">🌱 Special Education Hub</span>
+              <h2 class="welcome-heading">👋 Hello, <span id="welcome-name">Arjun</span>!</h2>
+              <p class="welcome-subtext">What fun activity would you like to play today?</p>
+            </div>
+
+            <div class="welcome-actions-row">
+              <button type="button" id="btn-continue-learning" class="liquid-btn liquid-btn-primary" title="Resume or start your next activity">
+                ▶️ Continue Learning
+              </button>
+              <button type="button" id="btn-listen-welcome" class="btn-listen-prompt liquid-btn liquid-btn-secondary" title="Listen to greeting">
+                🔊 Listen
+              </button>
+            </div>
+
+            <!-- Difficulty Selector Pills as a Segmented Control -->
+            <div class="home-difficulty-bar segmented-control glass-pill" role="radiogroup" aria-label="Difficulty Level">
+              <span class="diff-bar-title">Level:</span>
+              <button type="button" class="home-diff-pill liquid-btn liquid-btn-secondary liquid-btn-sm active" data-diff="easy" role="radio" aria-checked="true">
+                🌱 Level 1 • Easy
+              </button>
+              <button type="button" class="home-diff-pill liquid-btn liquid-btn-secondary liquid-btn-sm" data-diff="medium" role="radio" aria-checked="false">
+                ⭐ Level 2 • Medium
+              </button>
+              <button type="button" class="home-diff-pill liquid-btn liquid-btn-secondary liquid-btn-sm" data-diff="advanced" role="radio" aria-checked="false">
+                🚀 Level 3 • Advanced
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Gamification Stats & Student Profile Summary Card -->
+          <div class="home-hero-stats home-profile-card">
+            <div class="home-profile-meta">
+              <div class="home-profile-avatar-wrap">
+                <span class="home-profile-avatar" id="home-profile-avatar">🌟</span>
+              </div>
+              <div class="home-profile-details">
+                <span class="home-profile-name" id="home-profile-name">Arjun Kumar</span>
+                <span class="home-profile-tier" id="home-profile-tier">Mild Support Tier</span>
+              </div>
+            </div>
+
+            <!-- Gamification Stats (130 Score & 1 Day Streak) -->
+            <div class="hero-stats-grid">
+              <div class="stat-card stat-score">
+                <div class="stat-icon-wrap">💯</div>
+                <div class="stat-content">
+                  <span class="stat-value" id="home-score-count">130</span>
+                  <span class="stat-label">Score</span>
+                </div>
+              </div>
+
+              <div class="stat-card stat-streak">
+                <div class="stat-icon-wrap">🔥</div>
+                <div class="stat-content">
+                  <span class="stat-value" id="home-streak-count">1</span>
+                  <span class="stat-label">Day Streak</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Learning Journey Progress Bar -->
+            <div class="home-journey-progress">
+              <div class="journey-header">
+                <span class="journey-title">🎯 Learning Journey</span>
+                <span class="journey-count" id="home-overall-progress-label">0 / 18</span>
+              </div>
+              <div class="liquid-progress-track" role="progressbar" aria-label="Learning Journey Progress">
+                <div id="home-overall-progress-fill" class="liquid-progress-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation sections are accessible via the top-nav Hamburger Menu Drawer (☰) -->
+
+      <!-- Feature Detail Drawer (Shown for Profile, Achievements, Progress, Rewards, Daily Plan, Settings) -->
+      <div id="dash-feature-panel" class="dash-feature-panel glass-panel glass-card hidden">
+        <!-- Populated dynamically by AppController.renderDashboardFeaturePanel() -->
+      </div>
+
+      <!-- 4. Learning Sections Filter Bar & Content Area -->
+      <div class="learning-categories-header">
+        <div class="learning-categories-title-wrap">
+          <h3 class="learning-categories-title">📂 Learning Categories</h3>
+          <p class="learning-categories-sub">Choose a category to find fun games and activities tailored for you</p>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs Bar for Learning Sections -->
+      <div id="category-filter-row" class="category-filter-row category-tabs-bar" role="tablist" aria-label="Learning Categories">
+        <button type="button" class="cat-pill category-tab-btn liquid-btn liquid-btn-secondary liquid-btn-sm active" data-cat="all" role="tab" aria-selected="true">
+          <span class="tab-icon">🌟</span>
+          <span class="tab-text">All Sections</span>
+        </button>
+        <button type="button" class="cat-pill category-tab-btn liquid-btn liquid-btn-secondary liquid-btn-sm" data-cat="basics" role="tab" aria-selected="false">
+          <span class="tab-icon">📚</span>
+          <span class="tab-text">ABCs, Numbers & World</span>
+        </button>
+        <button type="button" class="cat-pill category-tab-btn liquid-btn liquid-btn-secondary liquid-btn-sm" data-cat="life" role="tab" aria-selected="false">
+          <span class="tab-icon">🌿</span>
+          <span class="tab-text">Life, Safety & Social</span>
+        </button>
+        <button type="button" class="cat-pill category-tab-btn liquid-btn liquid-btn-secondary liquid-btn-sm" data-cat="creative" role="tab" aria-selected="false">
+          <span class="tab-icon">🎨</span>
+          <span class="tab-text">Music, Memory & Play</span>
+        </button>
+      </div>
+
+      <div class="cards-grid" id="learning-cards-grid">
+        <!-- 1. Alphabet Learning -->
+        <div class="activity-card glass-panel glass-card card-alphabet" data-module="alphabet" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="alphabet" aria-label="Favorite Alphabet Learning">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="alphabet">✓ Played</span>
+          <div class="card-art">🔤</div>
+          <h3 class="card-title">Alphabet Learning</h3>
+          <p class="card-desc">Tap letters A–Z, listen to phonics & find matching words!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 2. Numbers & Counting -->
+        <div class="activity-card glass-panel glass-card card-numbers" data-module="numbers" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="numbers" aria-label="Favorite Numbers & Counting">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="numbers">✓ Played</span>
+          <div class="card-art">🔢</div>
+          <h3 class="card-title">Numbers & Counting</h3>
+          <p class="card-desc">Touch items to count aloud and solve fun number games!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 3. Animals & Birds -->
+        <div class="activity-card glass-panel glass-card card-animals" data-module="animals" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="animals" aria-label="Favorite Animals & Birds">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="animals">✓ Played</span>
+          <div class="card-art">🦁</div>
+          <h3 class="card-title">Animals & Birds</h3>
+          <p class="card-desc">Meet pets, jungle friends, and colorful flying birds!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 4. Fruits & Vegetables -->
+        <div class="activity-card glass-panel glass-card card-fruits" data-module="fruits" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="fruits" aria-label="Favorite Fruits & Vegetables">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="fruits">✓ Played</span>
+          <div class="card-art">🍎</div>
+          <h3 class="card-title">Fruits & Vegetables</h3>
+          <p class="card-desc">Learn sweet fruits, crunchy veggies & healthy foods!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 5. Body Parts -->
+        <div class="activity-card glass-panel glass-card card-bodyparts" data-module="bodyparts" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="bodyparts" aria-label="Favorite Body Parts">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="bodyparts">✓ Played</span>
+          <div class="card-art">🧍</div>
+          <h3 class="card-title">Body Parts</h3>
+          <p class="card-desc">Discover eyes, ears, hands, heart & how senses work!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 6. Safety & Awareness -->
+        <div class="activity-card glass-panel glass-card card-safety" data-module="safety" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="safety" aria-label="Favorite Safety & Awareness">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="safety">✓ Played</span>
+          <div class="card-art">🚦</div>
+          <h3 class="card-title">Safety & Awareness</h3>
+          <p class="card-desc">Road rules, kitchen safety, helmets & trusted adults!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 7. Personal Hygiene -->
+        <div class="activity-card glass-panel glass-card card-hygiene" data-module="hygiene" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="hygiene" aria-label="Favorite Personal Hygiene">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="hygiene">✓ Played</span>
+          <div class="card-art">🧼</div>
+          <h3 class="card-title">Personal Hygiene</h3>
+          <p class="card-desc">Clean hands, brushing, bathing & staying healthy daily!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 8. Memory & Matching -->
+        <div class="activity-card glass-panel glass-card card-memory" data-module="memory" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="memory" aria-label="Favorite Memory & Matching">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="memory">✓ Played</span>
+          <div class="card-art">🧠</div>
+          <h3 class="card-title">Memory & Matching</h3>
+          <p class="card-desc">Flip translucent cards and match adorable pairs!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 9. Social Skills -->
+        <div class="activity-card glass-panel glass-card card-social" data-module="social" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="social" aria-label="Favorite Social Skills">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="social">✓ Played</span>
+          <div class="card-art">🤝</div>
+          <h3 class="card-title">Social Skills</h3>
+          <p class="card-desc">Practice sharing, taking turns, kindness & magic words!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 10. Communication Skills -->
+        <div class="activity-card glass-panel glass-card card-communication" data-module="communication" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="communication" aria-label="Favorite Communication Skills">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="communication">✓ Played</span>
+          <div class="card-art">🗣️</div>
+          <h3 class="card-title">Communication Skills</h3>
+          <p class="card-desc">Tap AAC voice picture tiles to speak requests aloud!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 11. Music & Rhymes -->
+        <div class="activity-card glass-panel glass-card card-music" data-module="music" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="music" aria-label="Favorite Music & Rhymes">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="music">✓ Played</span>
+          <div class="card-art">🎶</div>
+          <h3 class="card-title">Music & Rhymes</h3>
+          <p class="card-desc">Play a rainbow xylophone & listen to sweet nursery rhymes!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 12. Time & Calendar -->
+        <div class="activity-card glass-panel glass-card card-timecalendar" data-module="timecalendar" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="timecalendar" aria-label="Favorite Time & Calendar">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="timecalendar">✓ Played</span>
+          <div class="card-art">⏰</div>
+          <h3 class="card-title">Time & Calendar</h3>
+          <p class="card-desc">Explore morning/night routines, weekdays & analog clocks!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- Original Classic Modules Preserved -->
+        <div class="activity-card glass-panel glass-card card-shapes" data-module="shapes" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="shapes" aria-label="Favorite Shapes & Colors">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="shapes">✓ Played</span>
+          <div class="card-art">🎨</div>
+          <h3 class="card-title">Shapes & Colors</h3>
+          <p class="card-desc">Find colors, stars, circles, and squares!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <div class="activity-card glass-panel glass-card card-daily" data-module="daily" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="daily" aria-label="Favorite Daily Habits">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="daily">✓ Played</span>
+          <div class="card-art">🪥</div>
+          <h3 class="card-title">Daily Habits</h3>
+          <p class="card-desc">Brushing teeth, washing hands, and getting ready!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <div class="activity-card glass-panel glass-card card-emotions" data-module="emotions" data-category="life" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="emotions" aria-label="Favorite Feelings & Faces">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="emotions">✓ Played</span>
+          <div class="card-art">😊</div>
+          <h3 class="card-title">Feelings & Faces</h3>
+          <p class="card-desc">Learn Happy, Sad, Calm, and Excitement!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <div class="activity-card glass-panel glass-card card-counting" data-module="counting" data-category="basics" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="counting" aria-label="Favorite Counting Fun">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="counting">✓ Played</span>
+          <div class="card-art">🧺</div>
+          <h3 class="card-title">Quick Count Fun</h3>
+          <p class="card-desc">Touch and count apples, stars, and toys!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <div class="activity-card glass-panel glass-card card-sounds" data-module="sounds" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="sounds" aria-label="Favorite Listen & Match">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="sounds">✓ Played</span>
+          <div class="card-art">🔔</div>
+          <h3 class="card-title">Listen & Match</h3>
+          <p class="card-desc">Listen to bells, horns, and birds!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <div class="activity-card glass-panel glass-card card-calm" data-module="calming" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="calming" aria-label="Favorite Pop Bubbles">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="calming">✓ Played</span>
+          <div class="card-art">🫧</div>
+          <h3 class="card-title">Pop Bubbles</h3>
+          <p class="card-desc">Relax, breathe, and pop floating bubbles!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
+        </div>
+
+        <!-- 13. Teacher's Custom Flashcards -->
+        <div class="activity-card glass-panel glass-card card-custom-teacher" data-module="custom_teacher" data-category="basics" role="button" tabindex="0" style="border: 2px dashed rgba(79, 70, 229, 0.45); background: linear-gradient(135deg, rgba(238, 242, 255, 0.95), rgba(224, 231, 255, 0.85));">
+          <button type="button" class="card-fav-btn" data-fav-module="custom_teacher" aria-label="Favorite Teacher Flashcards">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="custom_teacher">✓ Played</span>
+          <div class="card-art">🎨</div>
+          <h3 class="card-title" data-i18n-key="nav_custom_lessons">Teacher's Lessons</h3>
+          <p class="card-desc">Play customized flashcards created by your special educator!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Play Cards ➡️</span>
+        </div>
+      </div>
+
+      <div id="favorites-empty-notice" class="dash-empty-box glass-panel glass-card hidden">
+        <h3>❤️ No Favorites Picked Yet!</h3>
+        <p>Tap the little heart icon 🤍 on any activity card to save your favorite lessons right here.</p>
+        <button type="button" id="btn-show-all-activities" class="btn btn-primary liquid-btn liquid-btn-primary">🌟 Show All Activities</button>
+      </div>
+    </section>
+
+    <!-- VIEW 2: Active Activity Play Stage -->
+    <section id="view-play" class="view-section hidden" aria-label="Game Stage">
+      <div class="stage-nav-bar">
+        <button id="btn-back-home" class="btn-home liquid-btn liquid-btn-secondary">
+          <span class="home-icon">🏠</span>
+          <span class="home-label">Back to Games</span>
+        </button>
+        <div class="current-module-pill glass-pill" id="current-module-badge">🎨 Shapes & Colors</div>
+      </div>
+
+      <div class="game-stage-card glass-panel glass-card" id="activity-stage" aria-live="polite">
+        <!-- Rendered by Module JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: Dedicated Teacher & Special Educator Dashboard -->
+    <section id="view-teacher-dashboard" class="view-section hidden" aria-label="Teacher Dashboard">
+      <div class="teacher-glass-layout">
+        <aside class="teacher-glass-sidebar glass-sidebar glass-panel glass-card" aria-label="Educator Navigation">
+          <div class="sidebar-brand-block">
+            <span class="sidebar-orb">👩‍🏫</span>
+            <div>
+              <strong style="font-size: 1.05rem; color: var(--text-dark); display: block;">Educator Studio</strong>
+              <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">IEP & Analytics</span>
+            </div>
+          </div>
+          <nav class="sidebar-nav-list" aria-label="Teacher sections">
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary active" data-teacher-scroll="sec-teacher-overview">🏠 Overview</button>
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="teacher-charts-panel">📈 Performance Charts</button>
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="sec-teacher-students">👥 Student Profiles</button>
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="sec-teacher-logs">📊 Activity History</button>
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="sec-teacher-custom-lessons">🎨 Custom Lessons</button>
+            <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="sec-teacher-accreditation">🎓 IEP & Outcomes</button>
+          </nav>
+          <div class="sidebar-footer-actions">
+            <button type="button" id="btn-sidebar-add-student" class="btn btn-primary liquid-btn liquid-btn-primary" style="width: 100%;">➕ Add Learner</button>
+            <button type="button" id="btn-sidebar-export-report" class="btn btn-secondary liquid-btn liquid-btn-secondary" style="width: 100%;" title="Export Center-Wide Special Education IEP Progress Report as PDF">📄 Export Report (PDF)</button>
+          </div>
+        </aside>
+
+        <div class="teacher-main-content">
+          <div id="sec-teacher-overview" class="welcome-banner glass-panel glass-card" style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h2 class="welcome-heading" id="staff-dashboard-heading">👩‍🏫 Special Educator & IEP Monitoring Portal</h2>
+              <p class="welcome-subtext" id="staff-dashboard-subtext">Manage student profiles, cognitive support levels, and track Individualized Education Programs</p>
+            </div>
+            <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+              <button id="btn-teacher-print-report" class="btn btn-secondary liquid-btn liquid-btn-secondary liquid-btn-sm" title="Generate and Download Official Center-Wide IEP Evaluation PDF">📄 Generate Report (PDF)</button>
+              <button id="btn-teacher-export-json" class="btn btn-secondary liquid-btn liquid-btn-secondary liquid-btn-sm">📥 Export JSON</button>
+              <button id="btn-teacher-play-as-student" class="btn btn-primary liquid-btn liquid-btn-primary liquid-btn-sm">🎮 Launch Learning</button>
+            </div>
+          </div>
+
+          <!-- Quick Class KPI Cards -->
+          <div class="analytics-bar">
+            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-students">4</span> Enrolled Students</div>
+            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-sessions">0</span> Completed Tasks</div>
+            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-accuracy">0%</span> First-Try Success</div>
+            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-time">0m</span> Active Engagement</div>
+          </div>
+
+          <!-- Student Performance Charts -->
+          <div id="teacher-charts-panel" class="glass-panel glass-card teacher-section-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 style="font-size: 1.35rem; color: var(--primary-glass);">📈 Student Performance & Engagement Charts</h3>
+              <span class="glass-pill" style="padding: 0.35rem 0.9rem; font-size: 0.85rem;">Live Database Telemetry</span>
+            </div>
+            <div id="teacher-performance-charts" class="teacher-charts-grid">
+              <!-- Populated by AppController.refreshTeacherDashboard() -->
+            </div>
+          </div>
+
+          <!-- Student Management & Roster -->
+          <div id="sec-teacher-students" class="glass-panel glass-card teacher-section-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 style="font-size: 1.4rem; color: var(--primary-glass);">👥 Student Management Cards & Support Tiers</h3>
+              <button id="btn-open-add-student-modal" class="btn btn-primary liquid-btn liquid-btn-primary liquid-btn-sm">➕ Add Student</button>
+            </div>
+            <div id="teacher-student-cards-grid" class="student-mgmt-grid">
+              <!-- Populated by AppController.refreshTeacherDashboard() -->
+            </div>
+            <div class="table-container" style="margin-top: 1.25rem;">
+              <table class="data-table" id="table-teacher-roster">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Student Name</th>
+                    <th>Special Needs Profile</th>
+                    <th>Cognitive Support Tier</th>
+                    <th>Stars</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="teacher-roster-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Live Session Activity Logs Table -->
+          <div id="sec-teacher-logs" class="glass-panel glass-card teacher-section-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 style="font-size: 1.4rem; color: var(--primary-glass);">📊 Student Activity History & Response Latencies</h3>
+              <button id="btn-clear-teacher-logs" class="btn btn-danger liquid-btn liquid-btn-danger liquid-btn-sm">🧹 Reset Logs</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Student</th>
+                    <th>Module</th>
+                    <th>Objective</th>
+                    <th>Status</th>
+                    <th>Trials</th>
+                    <th>Latency</th>
+                  </tr>
+                </thead>
+                <tbody id="teacher-logs-tbody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Educator Custom Lessons & Multi-Sensory Flashcard Studio -->
+          <div id="sec-teacher-custom-lessons" class="glass-panel glass-card teacher-section-box" style="margin-top: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+              <div>
+                <h3 style="font-size: 1.35rem; color: var(--primary-glass); margin: 0;">🎨 Educator Custom Lesson & Flashcard Studio</h3>
+                <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Author tailored multimodal activities mapped to your students' Individualized Education Programs</p>
+              </div>
+              <button type="button" id="btn-toggle-create-lesson" class="btn btn-primary liquid-btn liquid-btn-primary liquid-btn-sm">➕ Create New Lesson</button>
+            </div>
+
+            <!-- New Custom Lesson Form (Toggleable) -->
+            <form id="form-create-custom-lesson" class="glass-panel glass-card hidden" style="padding: 1.25rem; border-radius: 16px; margin-bottom: 1.25rem; background: #F8FAFC;" onsubmit="return false;">
+              <h4 style="margin: 0 0 0.8rem 0; color: #1E1B4B;">Create Custom Multimodal Activity</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem;">
+                <div class="form-group">
+                  <label for="lesson-title">Activity Title</label>
+                  <input type="text" id="lesson-title" class="glass-input" placeholder="e.g. Identify Classroom Object" required>
+                </div>
+                <div class="form-group">
+                  <label for="lesson-category">Category</label>
+                  <select id="lesson-category" class="glass-input glass-dropdown">
+                    <option value="Adaptive Life Skills">Adaptive Life Skills</option>
+                    <option value="Phonics & Literacy">Phonics & Literacy</option>
+                    <option value="Cognitive Reasoning">Cognitive Reasoning</option>
+                    <option value="Social & Emotional">Social & Emotional</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="lesson-prompt">Spoken & Visual Prompt Question</label>
+                  <input type="text" id="lesson-prompt" class="glass-input" placeholder="e.g. Which item do you pack for school?" required>
+                </div>
+                <div class="form-group">
+                  <label for="lesson-icon">Mascot / Visual Icon (Emoji or Icon)</label>
+                  <input type="text" id="lesson-icon" class="glass-input" placeholder="e.g. 🎒, 🥛, 🧼, 🍎" value="🎒">
+                </div>
+                <div class="form-group">
+                  <label for="lesson-correct">Correct Answer</label>
+                  <input type="text" id="lesson-correct" class="glass-input" placeholder="e.g. School Bag" required>
+                </div>
+                <div class="form-group">
+                  <label for="lesson-distractors">Distractor Choices (Comma-separated)</label>
+                  <input type="text" id="lesson-distractors" class="glass-input" placeholder="e.g. Water Bottle, Pencil Box, Toy Car" required>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;">
+                <button type="button" id="btn-cancel-lesson" class="liquid-btn liquid-btn-secondary liquid-btn-sm">Cancel</button>
+                <button type="submit" id="btn-save-custom-lesson" class="liquid-btn liquid-btn-success liquid-btn-sm">💾 Save & Publish to Students</button>
+              </div>
+            </form>
+
+            <!-- Custom Lessons Cards Grid -->
+            <div id="teacher-custom-lessons-grid" class="custom-lessons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Adaptive AI & Bayesian Knowledge Tracing (BKT) Cognitive Evaluation Panel -->
+          <div id="sec-teacher-adaptive-ai" class="glass-panel glass-card teacher-section-box" style="margin-top: 1.5rem; border: 1.5px solid #818CF8;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <div>
+                <h3 style="font-size: 1.35rem; color: #312E81; margin: 0;">🤖 Adaptive AI & Bayesian Knowledge Tracing (BKT) Pacing</h3>
+                <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Real-time machine learning model analyzing student response latency and predictive mastery</p>
+              </div>
+              <span class="glass-pill" style="background: #EEF2FF; color: #4338CA; font-weight: 700;">Live Latency BKT Model Active</span>
+            </div>
+
+            <div id="ai-adaptive-container" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 1.25rem;">
+              <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                <label for="ai-student-select" style="font-weight: 700; color: #1E1B4B;">Select Learner for AI Cognitive Evaluation:</label>
+                <select id="ai-student-select" class="glass-input glass-dropdown" style="min-width: 200px; padding: 0.45rem 0.85rem;">
+                  <!-- Populated by JS -->
+                </select>
+                <button type="button" id="btn-run-ai-eval" class="liquid-btn liquid-btn-primary liquid-btn-sm">⚡ Run AI Analysis</button>
+              </div>
+
+              <div id="ai-eval-results" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                <div class="kpi-card glass-card" style="padding: 1rem; text-align: center; background: #FFFFFF; border-radius: 14px;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #64748B;">BAYESIAN MASTERY P(L)</span>
+                  <div id="ai-mastery-val" style="font-size: 1.6rem; font-weight: 800; color: #4F46E5; margin-top: 0.25rem;">85.4%</div>
+                  <small id="ai-mastery-status" style="color: #059669; font-weight: 700;">Demonstrated Mastery</small>
+                </div>
+                <div class="kpi-card glass-card" style="padding: 1rem; text-align: center; background: #FFFFFF; border-radius: 14px;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #64748B;">MEAN LATENCY INDEX</span>
+                  <div id="ai-latency-val" style="font-size: 1.6rem; font-weight: 800; color: #0284C7; margin-top: 0.25rem;">2.1s</div>
+                  <small id="ai-latency-status" style="color: #0284C7; font-weight: 700;">Autonomous Attention</small>
+                </div>
+                <div class="kpi-card glass-card" style="padding: 1rem; text-align: center; background: #FFFFFF; border-radius: 14px;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #64748B;">AI-RECOMMENDED TIER</span>
+                  <div id="ai-tier-val" style="font-size: 1.4rem; font-weight: 800; color: #D97706; margin-top: 0.25rem;">Mild Support</div>
+                  <small id="ai-choices-val" style="color: #4B5563; font-weight: 700;">4-Choice Multimodal Array</small>
+                </div>
+              </div>
+              <div id="ai-insights-box" style="margin-top: 1rem; padding: 0.85rem 1rem; background: #EFF6FF; border-left: 4px solid #3B82F6; border-radius: 8px; font-size: 0.92rem; color: #1E3A8A;">
+                <strong>AI Pedagogical Guidance:</strong> <span id="ai-insights-text">Learner demonstrates robust retention and rapid stimulus selection. Recommend advancing to 4-choice multimodal arrays.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic PO5, PO6 & SDG 4 Accreditation Compliance -->
+          <div id="sec-teacher-accreditation" class="glass-panel glass-card teacher-section-box">
+            <h3 style="font-size: 1.4rem; color: var(--primary-glass); margin-bottom: 1rem;">🎓 Accreditation & Engineering Outcome Mapping</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+              <div class="compliance-box glass-panel glass-card" style="padding:1.25rem; border-radius:22px;">
+                <h4 style="font-size:1.15rem; color:#4F46E5; margin-bottom:0.4rem;">🌟 PO5: Modern Tool Usage</h4>
+                <p>Separate role-based portals, PWA offline caching, low-latency Web Speech API, procedural Web Audio chimes, and hardware-accelerated CSS glassmorphism.</p>
+              </div>
+              <div class="compliance-box glass-panel glass-card" style="padding:1.25rem; border-radius:22px;">
+                <h4 style="font-size:1.15rem; color:#10B981; margin-bottom:0.4rem;">🤝 PO6: The Engineer and Society</h4>
+                <p>Provides dignified, non-punitive digital access for neurodivergent learners while eliminating tedious manual paper record-keeping for special educators.</p>
+              </div>
+              <div class="compliance-box glass-panel glass-card" style="padding:1.25rem; border-radius:22px;">
+                <h4 style="font-size:1.15rem; color:#F59E0B; margin-bottom:0.4rem;">📚 UN SDG 4: Quality Education</h4>
+                <p>Direct implementation of Target 4.5 (equal educational opportunities for children with disabilities) and Target 4.a (inclusive, safe school environments).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       MODAL: Add New Student (For Teacher Dashboard)
+       ===================================================================== -->
+  <div id="modal-add-student" class="modal glass-modal hidden" role="dialog" aria-modal="true" aria-labelledby="add-student-title">
+    <div class="teacher-modal-box glass-panel glass-card" style="max-width: 500px;">
+      <div class="teacher-modal-header">
+        <div>
+          <h2 id="add-student-title">➕ Add New Student</h2>
+          <p class="modal-sub">Create a customized learner profile</p>
+        </div>
+        <button id="btn-close-add-student" class="btn-close liquid-btn liquid-btn-secondary liquid-btn-icon" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="teacher-modal-body">
+        <div style="margin-bottom: 1rem;">
+          <label for="input-new-student-name" style="display:block; font-weight:700; margin-bottom:0.3rem;">Student Full Name:</label>
+          <input type="text" id="input-new-student-name" class="input-control glass-input" placeholder="e.g. Vikram" required>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display:block; font-weight:700; margin-bottom:0.3rem;">Choose Mascot Avatar:</label>
+          <div class="glass-card" style="display: flex; gap: 0.5rem; font-size: 2rem; justify-content: center; padding: 0.5rem; border-radius: var(--radius-droplet-md);" id="new-avatar-selector">
+            <button type="button" class="avatar-option selected" data-avatar="🌟">🌟</button>
+            <button type="button" class="avatar-option" data-avatar="🦁">🦁</button>
+            <button type="button" class="avatar-option" data-avatar="🐻">🐻</button>
+            <button type="button" class="avatar-option" data-avatar="🦋">🦋</button>
+            <button type="button" class="avatar-option" data-avatar="🐰">🐰</button>
+            <button type="button" class="avatar-option" data-avatar="🐬">🐬</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label for="select-new-student-level" style="display:block; font-weight:700; margin-bottom:0.3rem;">Cognitive Support Level:</label>
+          <select id="select-new-student-level" class="input-control glass-input glass-dropdown">
+            <option value="mild">Mild (4 Choices, standard pace)</option>
+            <option value="moderate" selected>Moderate (3 Choices, emphasized audio cues)</option>
+            <option value="high">High / Intensive (2 Choices, maximum contrast)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="input-new-student-disability" style="display:block; font-weight:700; margin-bottom:0.3rem;">Special Needs Classification:</label>
+          <input type="text" id="input-new-student-disability" class="input-control glass-input" placeholder="e.g. Intellectual & Developmental Delay">
+        </div>
+
+        <button id="btn-save-new-student" class="btn btn-primary btn-large liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+          Save Student to Roster
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       Positive Celebration Pop-up
+       ===================================================================== -->
+  <div id="celebration-modal" class="modal glass-modal celebration-modal hidden" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+    <div class="celebration-box glass-panel glass-card">
+      <div class="celebration-badge" id="celebration-emoji">🌟</div>
+      <h2 id="celebration-title" class="celebration-title">Awesome Job!</h2>
+      <p id="celebration-msg" class="celebration-text">You got it right!</p>
+      
+      <div class="celebration-stars-row">
+        <span>⭐</span><span>⭐</span><span>⭐</span>
+      </div>
+
+      <div class="celebration-buttons">
+        <button id="btn-next-activity" class="btn btn-primary btn-huge liquid-btn liquid-btn-primary liquid-btn-huge">Next Activity ➡️</button>
+        <button id="btn-repeat-activity" class="btn btn-secondary liquid-btn liquid-btn-secondary">Play Again 🔁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       Multi-Network Device Sharing Modal
+       ===================================================================== -->
+  <div id="network-modal" class="modal glass-modal hidden" role="dialog" aria-modal="true" aria-labelledby="network-modal-title">
+    <div class="teacher-modal-box glass-panel glass-card">
+      <div class="teacher-modal-header">
+        <div>
+          <h2 id="network-modal-title">📡 Connect Mobile Phones & Tablets</h2>
+          <p class="modal-sub">Run Prerana across Wi-Fi, Ethernet, LAN, or Mobile Cellular Networks</p>
+        </div>
+        <button id="btn-close-network-modal" class="btn-close liquid-btn liquid-btn-secondary liquid-btn-icon" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="teacher-modal-body">
+        <div class="network-guide-grid">
+          <!-- Option A: Wi-Fi / LAN / Ethernet -->
+          <div class="net-card glass-panel glass-card">
+            <span class="net-type-badge wifi glass-pill">📶 Option 1: Same Wi-Fi or LAN</span>
+            <h4>Connect Phones & Tablets at Home or School</h4>
+            <p>1. Connect your phone/tablet to the <strong>same Wi-Fi or Hotspot</strong>.</p>
+            <p>2. Open Chrome or Safari and enter this URL:</p>
+            
+            <div class="url-copy-box">
+              <input type="text" id="input-wifi-url" readonly value="http://localhost:5000" class="url-input glass-input">
+              <button id="btn-copy-url" class="btn btn-secondary btn-sm liquid-btn liquid-btn-secondary liquid-btn-sm">📋 Copy Link</button>
+            </div>
+
+            <div class="qr-container" id="qr-container">
+              <img id="qr-image" src="" alt="Scan QR Code to open on phone" class="qr-code-img">
+              <p class="qr-caption">📷 Scan with your phone's camera to open instantly!</p>
+            </div>
+          </div>
+
+          <!-- Option B: Mobile 4G/5G Network / WAN -->
+          <div class="net-card glass-panel glass-card">
+            <span class="net-type-badge wan glass-pill">🌐 Option 2: Mobile Network (4G/5G / WAN)</span>
+            <h4>Access Outside Wi-Fi (Over the Internet)</h4>
+            <p>If students are on <strong>cellular mobile data (4G/5G)</strong> or outside the school:</p>
+            <ol style="margin-left: 1.25rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <li>Double-click <strong><code>run_wan_online.bat</code></strong> in your project folder.</li>
+              <li>It generates a secure public HTTPS link (e.g. <code>https://...loca.lt</code>).</li>
+              <li>Share that link — it works on <strong>ANY smartphone or network anywhere in the world!</strong></li>
+            </ol>
+            
+            <div class="pwa-offline-tip glass-card" style="margin-top: 1rem;">
+              <strong>💡 100% Offline Capability:</strong>
+              Once opened on a phone, tap <strong>"📲 Install App"</strong> or <em>"Add to Home Screen"</em>. The entire app is cached locally and will work even with mobile data completely turned off!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL: Forgot Password Assistance
+       ===================================================================== -->
+  <div id="modal-forgot-password" class="modal glass-modal hidden" role="dialog" aria-modal="true" aria-labelledby="forgot-modal-title">
+    <div class="teacher-modal-box glass-panel glass-card" style="max-width: 480px;">
+      <div class="teacher-modal-header">
+        <div>
+          <h2 id="forgot-modal-title">🔑 Password Assistance</h2>
+          <p class="modal-sub">Supportive password recovery for special school learners and staff</p>
+        </div>
+        <button id="btn-close-forgot-modal" class="btn-close liquid-btn liquid-btn-secondary liquid-btn-icon" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="teacher-modal-body" style="line-height: 1.6;">
+        <p><strong>🎒 For Students:</strong><br>
+        To keep sign-in stress-free, students can ask their classroom <strong>Special Educator</strong> or parent to reset their PIN or tap their mascot icon.</p>
+
+        <div class="glass-panel glass-card" style="padding: 1rem; border-radius: 18px; margin: 1rem 0;">
+          <strong>⚡ Default Evaluation Credentials:</strong>
+          <ul style="margin-left: 1.25rem; margin-top: 0.4rem;">
+            <li><strong>Student:</strong> <code>student</code> / <code>student123</code></li>
+            <li><strong>Teacher:</strong> <code>teacher</code> / <code>teacher123</code></li>
+            <li><strong>Admin:</strong> <code>admin</code> / <code>admin123</code></li>
+          </ul>
+        </div>
+
+        <button type="button" id="btn-ok-forgot-modal" class="btn btn-primary btn-large liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
+          Got It 👍
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       Printable IEP Sheet (Hidden on Screen, Appears on Print)
+       ===================================================================== -->
+  <div id="print-iep-container" class="print-only">
+    <div class="print-header">
+      <h2>SPECIAL SCHOOL IEP LEARNING ASSESSMENT REPORT</h2>
+      <p>Tool: Prerana Assistive Learning Platform | Date: <span id="print-date"></span></p>
+    </div>
+    <div style="margin: 15px 0;">
+      <p><strong>Student Name:</strong> <span id="print-student-name"></span> | <strong>Level:</strong> <span id="print-student-level"></span> | <strong>Stars:</strong> <span id="print-student-stars"></span></p>
+      <p><strong>Tasks Completed:</strong> <span id="print-total-tasks"></span> | <strong>First-Try Accuracy:</strong> <span id="print-accuracy"></span> | <strong>Time:</strong> <span id="print-duration"></span></p>
+    </div>
+    <table style="width:100%; border-collapse:collapse; margin-top:15px;" border="1">
+      <thead>
+        <tr><th>Time</th><th>Module</th><th>Objective</th><th>Status</th><th>Trials</th><th>Latency</th></tr>
+      </thead>
+      <tbody id="print-table-body"></tbody>
+    </table>
+    <div style="display:flex; justify-content:space-between; margin-top:50px;">
+      <div>____________________________<br>Special Educator Signature</div>
+      <div>____________________________<br>Principal / Academic Head</div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="scripts/assistive-access.js?v=1"></script>
+  <script src="scripts/i18n.js?v=1"></script>
+  <script src="scripts/audio.js?v=9"></script>
+  <script src="scripts/tts.js?v=9"></script>
+  <script src="scripts/storage.js?v=9"></script>
+  <script src="scripts/modules/shapes.js?v=11"></script>
+  <script src="scripts/modules/daily-skills.js?v=11"></script>
+  <script src="scripts/modules/emotions.js?v=11"></script>
+  <script src="scripts/modules/counting.js?v=11"></script>
+  <script src="scripts/modules/sounds.js?v=11"></script>
+  <script src="scripts/modules/calming.js?v=11"></script>
+  <script src="scripts/modules/catalog-activities.js?v=11"></script>
+  <script src="scripts/modules/special-activities.js?v=11"></script>
+  <script src="scripts/app.js?v=11"></script>
+</body>
+</html>
