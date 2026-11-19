@@ -3,18 +3,20 @@
  * Provides offline-first resilience across mobile networks (4G/5G), Wi-Fi, LAN, and Ethernet.
  */
 
-const CACHE_NAME = 'prerana-cache-v11';
+const CACHE_NAME = 'prerana-cache-v12';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './styles/main.css?v=10',
+  './styles/main.css?v=11',
   './styles/liquid-glass-buttons.css?v=2',
+  './scripts/assistive-access.js?v=1',
+  './scripts/i18n.js?v=1',
   './scripts/audio.js?v=9',
   './scripts/tts.js?v=9',
   './scripts/storage.js?v=9',
-  './scripts/app.js?v=11',
+  './scripts/app.js?v=12',
   './scripts/modules/shapes.js?v=11',
   './scripts/modules/daily-skills.js?v=11',
   './scripts/modules/emotions.js?v=11',

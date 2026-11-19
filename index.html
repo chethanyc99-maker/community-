@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Prerana">
 
-  <link rel="stylesheet" href="styles/main.css?v=10">
+  <link rel="stylesheet" href="styles/main.css?v=11">
   <link rel="stylesheet" href="styles/liquid-glass-buttons.css?v=2">
   <style>
     .hidden,
@@ -535,12 +535,12 @@
       </div>
 
       <!-- 2. Hero Welcome & Stats Banner -->
-      <div class="welcome-banner home-hero-container glass-panel glass-card">
+      <div class="welcome-banner home-hero-container glass-panel glass-card bento-card bento-hero">
         <div class="home-hero-grid">
           <!-- Left: Friendly Greeting & Difficulty Selector Segmented Control -->
           <div class="home-hero-main">
             <div class="welcome-header-wrap">
-              <span class="welcome-badge">🌱 Special Education Hub</span>
+              <span class="welcome-badge bento-badge">🌱 Special Education Hub</span>
               <h2 class="welcome-heading">👋 Hello, <span id="welcome-name">Arjun</span>!</h2>
               <p class="welcome-subtext">What fun activity would you like to play today?</p>
             </div>
@@ -570,7 +570,7 @@
           </div>
 
           <!-- Right: Gamification Stats & Student Profile Summary Card -->
-          <div class="home-hero-stats home-profile-card">
+          <div class="home-hero-stats home-profile-card bento-card">
             <div class="home-profile-meta">
               <div class="home-profile-avatar-wrap">
                 <span class="home-profile-avatar" id="home-profile-avatar">🌟</span>
@@ -583,19 +583,19 @@
 
             <!-- Gamification Stats (130 Score & 1 Day Streak) -->
             <div class="hero-stats-grid">
-              <div class="stat-card stat-score">
-                <div class="stat-icon-wrap">💯</div>
+              <div class="stat-card stat-score bento-card bento-kpi">
+                <div class="stat-icon-wrap bento-kpi-icon">💯</div>
                 <div class="stat-content">
-                  <span class="stat-value" id="home-score-count">130</span>
-                  <span class="stat-label">Score</span>
+                  <span class="stat-value bento-kpi-val" id="home-score-count">130</span>
+                  <span class="stat-label bento-kpi-label">Score</span>
                 </div>
               </div>
 
-              <div class="stat-card stat-streak">
-                <div class="stat-icon-wrap">🔥</div>
+              <div class="stat-card stat-streak bento-card bento-kpi">
+                <div class="stat-icon-wrap bento-kpi-icon">🔥</div>
                 <div class="stat-content">
-                  <span class="stat-value" id="home-streak-count">1</span>
-                  <span class="stat-label">Day Streak</span>
+                  <span class="stat-value bento-kpi-val" id="home-streak-count">1</span>
+                  <span class="stat-label bento-kpi-label">Day Streak</span>
                 </div>
               </div>
             </div>
@@ -884,8 +884,9 @@
         </aside>
 
         <div class="teacher-main-content">
-          <div id="sec-teacher-overview" class="welcome-banner glass-panel glass-card" style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div id="sec-teacher-overview" class="welcome-banner glass-panel glass-card bento-card bento-hero" style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
+              <span class="welcome-badge bento-badge" style="margin-bottom: 0.5rem;">🛡️ Live Educator Station</span>
               <h2 class="welcome-heading" id="staff-dashboard-heading">👩‍🏫 Special Educator & IEP Monitoring Portal</h2>
               <p class="welcome-subtext" id="staff-dashboard-subtext">Manage student profiles, cognitive support levels, and track Individualized Education Programs</p>
             </div>
@@ -896,12 +897,24 @@
             </div>
           </div>
 
-          <!-- Quick Class KPI Cards -->
-          <div class="analytics-bar">
-            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-students">4</span> Enrolled Students</div>
-            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-sessions">0</span> Completed Tasks</div>
-            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-accuracy">0%</span> First-Try Success</div>
-            <div class="stat-pill glass-panel glass-card"><span class="stat-val" id="teacher-kpi-time">0m</span> Active Engagement</div>
+          <!-- Quick Class KPI Bento Grid -->
+          <div class="analytics-bar bento-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="stat-pill glass-panel glass-card bento-card bento-kpi">
+              <span class="stat-val bento-kpi-val" id="teacher-kpi-students">4</span>
+              <span class="bento-kpi-label">Enrolled Learners</span>
+            </div>
+            <div class="stat-pill glass-panel glass-card bento-card bento-kpi">
+              <span class="stat-val bento-kpi-val" id="teacher-kpi-sessions">0</span>
+              <span class="bento-kpi-label">Completed Tasks</span>
+            </div>
+            <div class="stat-pill glass-panel glass-card bento-card bento-kpi">
+              <span class="stat-val bento-kpi-val" id="teacher-kpi-accuracy">0%</span>
+              <span class="bento-kpi-label">First-Try Success</span>
+            </div>
+            <div class="stat-pill glass-panel glass-card bento-card bento-kpi">
+              <span class="stat-val bento-kpi-val" id="teacher-kpi-time">0m</span>
+              <span class="bento-kpi-label">Active Engagement</span>
+            </div>
           </div>
 
           <!-- Student Performance Charts -->
@@ -1288,6 +1301,6 @@
   <script src="scripts/modules/calming.js?v=11"></script>
   <script src="scripts/modules/catalog-activities.js?v=11"></script>
   <script src="scripts/modules/special-activities.js?v=11"></script>
-  <script src="scripts/app.js?v=11"></script>
+  <script src="scripts/app.js?v=12"></script>
 </body>
 </html>
