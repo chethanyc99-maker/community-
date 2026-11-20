@@ -1,0 +1,189 @@
+/* ==========================================================================
+   liquid-glass-stage.css - High-Contrast Liquid Glass Background Stage
+   Provides a luminous multi-layered background with animated radial orbs and
+   a subtle geometric grid to showcase Liquid Glass refraction and chromatic dispersion.
+   ========================================================================== */
+
+/* Full-Viewport Fixed Background Stage Wrapper */
+body.bg-aura-dark,
+body.bg-daylight-mesh,
+body.bg-grid-minimal,
+body:has(.liquid-bg-stage) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.liquid-bg-stage {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #0b0f1a;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   Preset 1: .bg-aura-dark (Default Deep Navy Animated Aura Mesh + Grid)
+   ========================================================================== */
+.bg-aura-dark .liquid-bg-stage,
+.liquid-bg-stage.bg-aura-dark,
+.liquid-bg-stage {
+  background-color: #0b0f1a;
+}
+
+/* Luminous Radial Gradient Orbs Layer (140% size, 16s drift animation) */
+.bg-aura-dark .liquid-bg-stage::before,
+.liquid-bg-stage.bg-aura-dark::before,
+.liquid-bg-stage::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255, 107, 157, 0.55) 0%, transparent 42%),
+    radial-gradient(circle at 82% 28%, rgba(56, 189, 248, 0.55) 0%, transparent 45%),
+    radial-gradient(circle at 50% 82%, rgba(250, 204, 21, 0.42) 0%, transparent 48%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.50) 0%, transparent 45%);
+  background-size: 140% 140%;
+  animation: liquidAuraDrift 16s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+  pointer-events: none;
+}
+
+/* Subtle Geometric Refraction Grid Overlay (48px x 48px) */
+.bg-aura-dark .liquid-bg-stage::after,
+.liquid-bg-stage.bg-aura-dark::after,
+.liquid-bg-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Preset 2: .bg-daylight-mesh (VisionOS-style Crisp Light Pastel Mesh)
+   ========================================================================== */
+.bg-daylight-mesh .liquid-bg-stage,
+.liquid-bg-stage.bg-daylight-mesh {
+  background-color: #eef2ff;
+}
+
+.bg-daylight-mesh .liquid-bg-stage::before,
+.liquid-bg-stage.bg-daylight-mesh::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  background-image:
+    radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.35) 0%, transparent 48%),
+    radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.38) 0%, transparent 50%),
+    radial-gradient(circle at 45% 85%, rgba(244, 114, 182, 0.32) 0%, transparent 48%),
+    radial-gradient(circle at 85% 80%, rgba(52, 211, 153, 0.30) 0%, transparent 46%);
+  background-size: 140% 140%;
+  animation: liquidAuraDrift 16s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+  pointer-events: none;
+}
+
+.bg-daylight-mesh .liquid-bg-stage::after,
+.liquid-bg-stage.bg-daylight-mesh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(79, 70, 229, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Preset 3: .bg-grid-minimal (Clean Dark Grid with High-Contrast Orbs)
+   ========================================================================== */
+.bg-grid-minimal .liquid-bg-stage,
+.liquid-bg-stage.bg-grid-minimal {
+  background-color: #0e1320;
+}
+
+.bg-grid-minimal .liquid-bg-stage::before,
+.liquid-bg-stage.bg-grid-minimal::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(56, 189, 248, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 75% 25%, rgba(236, 72, 153, 0.60) 0%, transparent 42%),
+    radial-gradient(circle at 60% 80%, rgba(168, 85, 247, 0.58) 0%, transparent 45%),
+    radial-gradient(circle at 20% 75%, rgba(34, 197, 94, 0.50) 0%, transparent 42%);
+  background-size: 140% 140%;
+  animation: liquidAuraDrift 16s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+  pointer-events: none;
+}
+
+.bg-grid-minimal .liquid-bg-stage::after,
+.liquid-bg-stage.bg-grid-minimal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Smooth Drift Keyframe Animation
+   ========================================================================== */
+@keyframes liquidAuraDrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    background-position: 0% 0%;
+  }
+  50% {
+    transform: translate3d(-2.5%, -2%, 0) scale(1.05);
+    background-position: 50% 50%;
+  }
+  100% {
+    transform: translate3d(2.5%, 2.5%, 0) scale(0.98);
+    background-position: 100% 100%;
+  }
+}
+
+/* ==========================================================================
+   Performance & Accessibility (WCAG AAA)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-bg-stage::before,
+  .bg-aura-dark .liquid-bg-stage::before,
+  .bg-daylight-mesh .liquid-bg-stage::before,
+  .bg-grid-minimal .liquid-bg-stage::before {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* High Contrast Accessibility Override */
+body.theme-high-contrast .liquid-bg-stage {
+  background-color: #000000 !important;
+}
+
+body.theme-high-contrast .liquid-bg-stage::before {
+  display: none !important;
+}
+
+body.theme-high-contrast .liquid-bg-stage::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 0, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 0, 0.15) 1px, transparent 1px);
+}
