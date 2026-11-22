@@ -80,7 +80,6 @@ class AppController {
     this.initPWA();
     this.initNetworkStatus();
     this.initHeaderScrollEffect();
-    this.initBentoGlassTilt();
     window.addEventListener('resize', () => this.updateAuthSegmentIndicator());
     setTimeout(() => this.updateAuthSegmentIndicator(), 60);
 
@@ -112,52 +111,6 @@ class AppController {
     if (!header) return;
     const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
     header.classList.toggle('is-scrolled', scrollTop > 10 && !header.classList.contains('hidden'));
-  }
-
-  initBentoGlassTilt() {
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const attachTiltToCards = () => {
-      const cards = document.querySelectorAll(
-        '.glass-card, .activity-card, .bento-card, .kpi-card, .stat-card, .welcome-banner, .auth-card, .teacher-section-box, .custom-lesson-card, .compliance-box, .stat-pill'
-      );
-      cards.forEach(card => {
-        if (card._hasBentoTilt) return;
-        card._hasBentoTilt = true;
-
-        let rafId = null;
-        card.addEventListener('mousemove', (e) => {
-          if (document.body.classList.contains('theme-high-contrast') || document.body.classList.contains('reduced-motion')) return;
-          if (rafId) cancelAnimationFrame(rafId);
-          rafId = requestAnimationFrame(() => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
-
-            if (rect.height < 550 && rect.width < 900) {
-              const centerX = rect.width / 2;
-              const centerY = rect.height / 2;
-              const rotateX = ((y - centerY) / centerY) * -4.5;
-              const rotateY = ((x - centerX) / centerX) * 4.5;
-              card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px) scale3d(1.012, 1.012, 1.012)`;
-            }
-          });
-        });
-
-        card.addEventListener('mouseleave', () => {
-          if (rafId) cancelAnimationFrame(rafId);
-          card.style.transform = '';
-          card.style.removeProperty('--mouse-x');
-          card.style.removeProperty('--mouse-y');
-        });
-      });
-    };
-
-    attachTiltToCards();
-    window.addEventListener('prerana:dashboard-updated', () => setTimeout(attachTiltToCards, 100));
   }
 
   async checkInitialSession() {

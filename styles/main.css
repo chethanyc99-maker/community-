@@ -111,102 +111,58 @@ body {
 }
 
 /* ==========================================================================
-   Bento Glassmorphism 2.0 Primitives & Specular Frosted Glass
+   Clean Solid Accessible Panels & Cards (Zero Glass / Optical Physics)
    ========================================================================== */
 .glass-panel,
 .glass-card,
 .bento-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.70) 100%);
-  backdrop-filter: blur(26px) saturate(190%);
-  -webkit-backdrop-filter: blur(26px) saturate(190%);
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    0 12px 36px -10px rgba(79, 70, 229, 0.09),
-    0 4px 14px rgba(15, 23, 42, 0.03),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.03);
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle, #E2E8F0);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
   position: relative;
-  border-radius: var(--radius-droplet-lg, 24px);
+  border-radius: var(--radius-lg, 24px);
   overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.28s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .glass-card > *,
 .bento-card > * {
   position: relative;
-  z-index: 2;
-}
-
-/* Specular Torchlight Glare on Cursor Move */
-.glass-card::before,
-.bento-card::before,
-.activity-card::before,
-.welcome-banner::before,
-.auth-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    520px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0.12) 40%,
-    transparent 72%
-  );
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
   z-index: 1;
-}
-
-.glass-card:hover::before,
-.bento-card:hover::before,
-.activity-card:hover::before,
-.welcome-banner:hover::before,
-.auth-card:hover::before {
-  opacity: 1;
 }
 
 .glass-card:hover,
 .bento-card:hover {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 
-    0 22px 46px -12px rgba(79, 70, 229, 0.18),
-    0 8px 18px rgba(15, 23, 42, 0.05),
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09);
+  transform: translateY(-2px);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
-  border-radius: var(--radius-pill);
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  border-radius: var(--radius-full, 9999px);
 }
 
 .glass-navbar {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  background: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
 
 .glass-button {
   position: relative;
-  overflow: hidden;
   border: 1px solid #CBD5E1;
-  box-shadow: 0 2px 6px rgba(202, 204, 210, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
+  background: #F8FAFC;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .glass-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+  background: #F1F5F9;
+  border-color: #94A3B8;
+  transform: translateY(-1px);
 }
 
 .glass-button:active {
@@ -397,19 +353,15 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-  transition: background-color 0.25s ease,
-              border-color 0.25s ease,
-              box-shadow 0.25s ease,
-              backdrop-filter 0.25s ease,
-              -webkit-backdrop-filter 0.25s ease;
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
 }
 
 .top-nav.is-scrolled {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(5px) saturate(14%);
-  -webkit-backdrop-filter: blur(10px) saturate(145%);
-  border-color: rgba(211, 214, 216, 0.85);
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   padding: 0.55rem 1.35rem;
 }
 
@@ -826,27 +778,17 @@ h1.brand-title,
   position: relative;
   overflow: hidden;
   min-height: 290px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.72) 100%);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 
-    0 12px 32px -10px rgba(79, 70, 229, 0.08),
-    0 4px 14px rgba(15, 23, 42, 0.03),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
-  transform-style: preserve-3d;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              box-shadow 0.28s ease, 
-              border-color 0.28s ease;
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle, #E2E8F0);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  border-radius: var(--radius-lg, 24px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .activity-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 
-    0 22px 48px -12px rgba(79, 70, 229, 0.20),
-    0 8px 18px rgba(15, 23, 42, 0.05),
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
+  transform: translateY(-4px);
+  border-color: #CBD5E1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
 }
 
 .card-art {
@@ -1248,20 +1190,18 @@ h1.brand-title,
 }
 
 .stat-pill {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.70) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  border-radius: var(--radius-droplet-lg, 24px);
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle, #E2E8F0);
+  border-radius: var(--radius-lg, 24px);
   padding: 1.25rem 1rem;
   text-align: center;
-  box-shadow: 0 10px 25px -8px rgba(79, 70, 229, 0.08), inset 0 1px 1px rgba(255, 255, 255, 1);
-  transition: transform 0.25s var(--spring-bounce), box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .stat-pill:hover {
-  transform: translateY(-4px) scale(1.02);
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 16px 36px -10px rgba(79, 70, 229, 0.16);
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 .stat-val {
   display: block;
@@ -1385,12 +1325,12 @@ h1.brand-title,
   text-decoration: none;
   user-select: none;
   -webkit-user-select: none;
-  transition: transform 0.2s var(--spring-bounce, ease), box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
 }
 
 .btn:active,
 .liquid-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 /* Variant 1: Primary Action (Solid Brand Blue/Indigo) */
@@ -1398,28 +1338,32 @@ h1.brand-title,
 .liquid-btn-primary {
   background: var(--color-text-brand, #4F46E5) !important;
   color: var(--color-text-inverse, #FFFFFF) !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  border-color: var(--color-text-brand, #4F46E5) !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
 }
 .btn-primary:hover,
 .liquid-btn-primary:hover {
   background: #4338CA !important;
+  border-color: #4338CA !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
 
-/* Variant 2: Secondary / Glass Action (Translucent Frosted Surface) */
+/* Variant 2: Secondary Solid Action */
 .btn-secondary,
 .liquid-btn-secondary,
 .btn-home,
 .btn-listen-prompt {
-  background: rgba(255, 255, 255, 0.28) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #F1F5F9 !important;
   color: var(--color-text-primary, #0F172A) !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 .btn-secondary:hover,
-.liquid-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.45) !important;
+.liquid-btn-secondary:hover,
+.btn-home:hover,
+.btn-listen-prompt:hover {
+  background: #E2E8F0 !important;
+  border-color: #94A3B8 !important;
 }
 
 /* Variant 3: Danger / Destructive Action (Coral Red) */
@@ -1427,11 +1371,13 @@ h1.brand-title,
 .liquid-btn--danger {
   background: var(--color-text-danger, #EF4444) !important;
   color: var(--color-text-inverse, #FFFFFF) !important;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  border-color: var(--color-text-danger, #EF4444) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.28);
 }
 .btn-danger:hover,
 .liquid-btn--danger:hover {
   background: #DC2626 !important;
+  border-color: #DC2626 !important;
 }
 
 /* Variant 4: Ghost / Icon Controls (Navbar controls, close buttons) */
@@ -1441,9 +1387,16 @@ h1.brand-title,
   padding: 0 !important;
   width: var(--btn-h-sm, 36px);
   min-height: var(--btn-h-sm, 36px) !important;
-  background: rgba(255, 255, 255, 0.20) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
   color: var(--color-text-primary, #0F172A) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+.icon-control-btn:hover,
+.btn-close:hover,
+.nav-hamburger-btn:hover {
+  background: #E2E8F0 !important;
+  border-color: #94A3B8 !important;
 }
 
 /* Variant 5: Segmented / Pill Filters (Tabs, categories, difficulty) */
@@ -1453,9 +1406,14 @@ h1.brand-title,
   min-height: var(--btn-h-sm, 36px) !important;
   padding: 0.35rem 0.95rem !important;
   font-size: var(--text-sm, 0.875rem) !important;
-  background: rgba(255, 255, 255, 0.22) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
   color: var(--color-text-secondary, #334155) !important;
+}
+.cat-pill:hover,
+.home-diff-pill:hover,
+.auth-tab-btn:hover {
+  background: #E2E8F0 !important;
 }
 .cat-pill.active,
 .home-diff-pill.active,
@@ -1468,8 +1426,9 @@ h1.brand-title,
 /* Size Modifiers */
 .btn-huge,
 .liquid-btn-huge,
-.liquid-btn-lg {
-  min-height: var(--btn-h-lg, 56px) !important;
+.liquid-btn-lg,
+.btn-large {
+  min-height: var(--btn-h-lg, 54px) !important;
   font-size: var(--text-lg, 1.25rem) !important;
   padding: 0.95rem 2.2rem !important;
 }
@@ -2505,12 +2464,10 @@ body.reduced-motion * {
 .nav-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.55);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.28s ease;
+  transition: opacity 0.2s ease;
   z-index: 9998;
 }
 

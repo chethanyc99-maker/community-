@@ -14,8 +14,6 @@
   <meta name="apple-mobile-web-app-title" content="Prerana">
 
   <link rel="stylesheet" href="styles/main.css?v=12">
-  <link rel="stylesheet" href="styles/liquid-glass-buttons.css?v=3">
-  <link rel="stylesheet" href="styles/liquid-glass-stage.css?v=1">
   <style>
     .hidden,
     body.auth-locked .top-nav,
@@ -27,12 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=OpenDyslexic&display=swap" rel="stylesheet">
 </head>
-<body class="theme-calm font-standard auth-locked bg-aura-dark">
-
-  <!-- =====================================================================
-       High-Contrast Liquid Glass Background Stage (Luminous Orbs & Grid)
-       ===================================================================== -->
-  <div class="liquid-bg-stage" id="liquid-bg-stage" aria-hidden="true"></div>
+<body class="theme-calm font-standard auth-locked">
 
   <!-- =====================================================================
        Top Navigation Bar
@@ -80,34 +73,34 @@
 
       <!-- Teacher Status Area (Visible when teacher is active) -->
       <div class="teacher-status-area hidden" id="header-teacher-status">
-        <span class="glass-pill teacher-badge">👩‍🏫 Special Educator Dashboard</span>
-        <button id="btn-teacher-switch-student" class="btn btn-secondary btn-sm liquid-btn liquid-btn--tinted liquid-btn-sm">
-          <span class="liquid-btn__content">🎮 Student Game View</span>
+        <span class="teacher-badge">👩‍🏫 Special Educator Dashboard</span>
+        <button id="btn-teacher-switch-student" class="btn btn-secondary btn-sm">
+          🎮 Student Game View
         </button>
       </div>
 
       <!-- Quick Utility Controls (Voice, Contrast, Sign Out, Language) -->
       <div class="top-controls">
         <!-- Language Selector -->
-        <select id="select-app-language" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm" title="Change Language / ಭಾಷೆ ಬದಲಾಯಿಸಿ / भाषा बदलें" aria-label="Change Language" style="cursor: pointer; font-weight: 700; padding: 0.35rem 0.55rem; font-size: 0.8rem;">
+        <select id="select-app-language" class="icon-control-btn btn-sm" title="Change Language / ಭಾಷೆ ಬದಲಾಯಿಸಿ / भाषा बदलें" aria-label="Change Language" style="cursor: pointer; font-weight: 700; padding: 0.35rem 0.55rem; font-size: 0.8rem;">
           <option value="en">🌐 English</option>
           <option value="kn">ಕನ್ನಡ (Kannada)</option>
           <option value="hi">हिन्दी (Hindi)</option>
         </select>
 
         <!-- Voice Guidance Toggle -->
-        <button id="btn-toggle-tts" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm active" title="Voice Guidance (On/Off)" aria-pressed="true">
-          <span class="liquid-btn__content"><span class="ctrl-icon">🔊</span><span class="ctrl-text">Voice</span></span>
+        <button id="btn-toggle-tts" class="icon-control-btn active" title="Voice Guidance (On/Off)" aria-pressed="true">
+          <span class="ctrl-icon">🔊</span><span class="ctrl-text">Voice</span>
         </button>
 
         <!-- High Contrast Toggle -->
-        <button id="btn-toggle-contrast" class="icon-control-btn liquid-btn liquid-btn-secondary liquid-btn-sm" title="High Contrast Mode" aria-pressed="false">
-          <span class="liquid-btn__content"><span class="ctrl-icon">🌓</span><span class="ctrl-text">Contrast</span></span>
+        <button id="btn-toggle-contrast" class="icon-control-btn" title="High Contrast Mode" aria-pressed="false">
+          <span class="ctrl-icon">🌓</span><span class="ctrl-text">Contrast</span>
         </button>
 
         <!-- Dedicated Sign Out Button (Visible only when logged in) -->
-        <button id="btn-sign-out" class="sign-out-btn liquid-btn liquid-btn--danger liquid-btn-sm hidden" title="Sign Out of Account">
-          <span class="liquid-btn__content"><span class="ctrl-icon">🚪</span><span class="ctrl-text">Sign Out</span></span>
+        <button id="btn-sign-out" class="sign-out-btn btn btn-danger btn-sm hidden" title="Sign Out of Account">
+          <span class="ctrl-icon">🚪</span><span class="ctrl-text">Sign Out</span>
         </button>
       </div>
     </div>
@@ -293,8 +286,8 @@
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" id="btn-submit-student-login" class="liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                    <span class="liquid-btn__content"><span class="btn-label">Login</span></span>
+                  <button type="submit" id="btn-submit-student-login" class="btn btn-primary btn-large" style="width: 100%;">
+                    <span class="btn-label">Login</span>
                   </button>
                 </div>
               </form>
@@ -361,8 +354,8 @@
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" id="btn-submit-teacher-login" class="liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                    <span class="liquid-btn__content">Login to Teacher Portal</span>
+                  <button type="submit" id="btn-submit-teacher-login" class="btn btn-primary btn-large" style="width: 100%;">
+                    Login to Teacher Portal
                   </button>
                 </div>
               </form>
@@ -398,8 +391,8 @@
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" id="btn-submit-admin-login" class="liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                    <span class="liquid-btn__content">🛡️ Login as Administrator</span>
+                  <button type="submit" id="btn-submit-admin-login" class="btn btn-primary btn-large" style="width: 100%;">
+                    🛡️ Login as Administrator
                   </button>
                 </div>
               </form>
@@ -480,8 +473,8 @@
                   </div>
                 </div>
 
-                <button type="submit" id="btn-submit-reg-student" class="liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                  <span class="liquid-btn__content">🎉 Create Student Account</span>
+                <button type="submit" id="btn-submit-reg-student" class="btn btn-primary btn-large" style="width: 100%;">
+                  🎉 Create Student Account
                 </button>
               </form>
 
@@ -510,8 +503,8 @@
                   </div>
                 </div>
 
-                <button type="submit" id="btn-submit-reg-teacher" class="liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                  <span class="liquid-btn__content">👩‍🏫 Create Educator Account</span>
+                <button type="submit" id="btn-submit-reg-teacher" class="btn btn-primary btn-large" style="width: 100%;">
+                  👩‍🏫 Create Educator Account
                 </button>
               </form>
 
@@ -849,8 +842,8 @@
     <!-- VIEW 2: Active Activity Play Stage -->
     <section id="view-play" class="view-section hidden" aria-label="Game Stage">
       <div class="stage-nav-bar">
-        <button id="btn-back-home" class="btn-home liquid-btn liquid-btn-secondary">
-          <span class="liquid-btn__content"><span class="home-icon">🏠</span><span class="home-label">Back to Games</span></span>
+        <button id="btn-back-home" class="btn btn-secondary btn-home">
+          <span class="home-icon">🏠</span><span class="home-label">Back to Games</span>
         </button>
         <div class="current-module-pill glass-pill" id="current-module-badge">🎨 Shapes & Colors</div>
       </div>
@@ -880,8 +873,8 @@
             <button type="button" class="sidebar-nav-btn liquid-btn liquid-btn-secondary" data-teacher-scroll="sec-teacher-accreditation">🎓 IEP & Outcomes</button>
           </nav>
           <div class="sidebar-footer-actions">
-            <button type="button" id="btn-sidebar-add-student" class="btn btn-primary liquid-btn liquid-btn--tinted liquid-btn-primary" style="width: 100%;"><span class="liquid-btn__content">➕ Add Learner</span></button>
-            <button type="button" id="btn-sidebar-export-report" class="btn btn-secondary liquid-btn liquid-btn--secondary" style="width: 100%;" title="Export Center-Wide Special Education IEP Progress Report as PDF"><span class="liquid-btn__content">📄 Export Report (PDF)</span></button>
+            <button type="button" id="btn-sidebar-add-student" class="btn btn-primary" style="width: 100%;">➕ Add Learner</button>
+            <button type="button" id="btn-sidebar-export-report" class="btn btn-secondary" style="width: 100%;" title="Export Center-Wide Special Education IEP Progress Report as PDF">📄 Export Report (PDF)</button>
           </div>
         </aside>
 
@@ -893,9 +886,9 @@
               <p class="welcome-subtext" id="staff-dashboard-subtext">Manage student profiles, cognitive support levels, and track Individualized Education Programs</p>
             </div>
             <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-              <button id="btn-teacher-print-report" class="btn btn-secondary liquid-btn liquid-btn--secondary liquid-btn-sm" title="Generate and Download Official Center-Wide IEP Evaluation PDF"><span class="liquid-btn__content">📄 Generate Report (PDF)</span></button>
-              <button id="btn-teacher-export-json" class="btn btn-secondary liquid-btn liquid-btn--secondary liquid-btn-sm"><span class="liquid-btn__content">📥 Export JSON</span></button>
-              <button id="btn-teacher-play-as-student" class="btn btn-primary liquid-btn liquid-btn--tinted liquid-btn-primary liquid-btn-sm"><span class="liquid-btn__content">🎮 Launch Learning</span></button>
+              <button id="btn-teacher-print-report" class="btn btn-secondary btn-sm" title="Generate and Download Official Center-Wide IEP Evaluation PDF">📄 Generate Report (PDF)</button>
+              <button id="btn-teacher-export-json" class="btn btn-secondary btn-sm">📥 Export JSON</button>
+              <button id="btn-teacher-play-as-student" class="btn btn-primary btn-sm">🎮 Launch Learning</button>
             </div>
           </div>
 
@@ -1303,7 +1296,6 @@
   <script src="scripts/modules/calming.js?v=11"></script>
   <script src="scripts/modules/catalog-activities.js?v=11"></script>
   <script src="scripts/modules/special-activities.js?v=11"></script>
-  <script src="scripts/liquid-buttons.js?v=1"></script>
   <script src="scripts/app.js?v=12"></script>
 </body>
 </html>
