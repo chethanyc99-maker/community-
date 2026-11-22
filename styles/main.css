@@ -39,11 +39,41 @@
   --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --fluid-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Curvatures (Water Pebble Shapes) */
-  --radius-droplet-xl: 34px;
-  --radius-droplet-lg: 26px;
-  --radius-droplet-md: 18px;
-  --radius-pill: 999px;
+  /* Standardized 4-Token Corner Radius Scale (Consolidated System, Aim <= 6) */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* Backward Compatibility Aliases */
+  --radius-droplet-xl: var(--radius-lg);
+  --radius-droplet-lg: var(--radius-lg);
+  --radius-droplet-md: var(--radius-md);
+  --radius-pill: var(--radius-full);
+
+  /* Standardized 7-Step Typographic Scale (Aim <= 10) */
+  --text-xs: 0.75rem;    /* 12px - Captions, tags, status pills */
+  --text-sm: 0.875rem;   /* 14px - Helper text, secondary labels, badges */
+  --text-base: 1.00rem;  /* 16px - Body text, standard buttons, form inputs */
+  --text-md: 1.125rem;   /* 18px - Card titles, navigation tabs */
+  --text-lg: 1.25rem;    /* 20px - Subsection headers, brand title */
+  --text-xl: 1.50rem;    /* 24px - Module titles, dialog headings */
+  --text-2xl: 2.00rem;   /* 32px - Page hero headings / welcome title */
+
+  /* Standardized Semantic Text Colors (Aim <= 12) */
+  --color-text-primary: #0F172A;   /* Slate 900 - Headings & body (15.8:1 contrast on white) */
+  --color-text-secondary: #334155; /* Slate 700 - Subtitles & descriptions (9.1:1 contrast) */
+  --color-text-muted: #475569;     /* Slate 600 - Captions, disabled labels (7.2:1 contrast) */
+  --color-text-brand: #4338CA;     /* Indigo 700 - Interactive brand text (7.6:1 contrast) */
+  --color-text-inverse: #FFFFFF;   /* White - For dark buttons, pills, banners */
+  --color-text-success: #166534;   /* Green 800 - Success feedback */
+  --color-text-danger: #991B1B;    /* Red 800 - Error messages & sign-out */
+
+  /* Standardized Button Dimensions */
+  --btn-h-sm: 36px;
+  --btn-h-md: 46px;
+  --btn-h-lg: 54px;
+  --btn-radius: var(--radius-full);
 
   --font-main: 'Fredoka', system-ui, -apple-system, sans-serif;
   --font-dyslexic: 'OpenDyslexic', 'Comic Sans MS', sans-serif;
@@ -524,13 +554,19 @@ body:has(#view-teacher-dashboard:not(.hidden)) #nav-drawer-backdrop {
   box-shadow: 0 2px 6px rgba(79, 70, 229, 0.12);
 }
 
+h1.brand-title,
 .brand-title {
-  font-size: 1.75rem;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  font-size: var(--text-xl, 1.75rem);
   font-weight: 800;
+  line-height: 1.1;
   background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
+  border: none;
 }
 
 .brand-text-wrap {
@@ -539,12 +575,25 @@ body:has(#view-teacher-dashboard:not(.hidden)) #nav-drawer-backdrop {
 }
 
 .brand-sub {
-  font-size: 0.74rem;
+  font-size: var(--text-xs, 0.75rem);
   font-weight: 700;
-  color: #4F46E5;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--color-text-brand, #4F46E5);
+  letter-spacing: 0.01em;
+  text-transform: none; /* Preserves natural Title Case: "Assistive Learning" */
   margin-top: -2px;
+}
+
+/* Accessible Screen-Reader Utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .header-right-group {
@@ -1311,43 +1360,125 @@ body:has(#view-teacher-dashboard:not(.hidden)) #nav-drawer-backdrop {
 }
 
 /* ==========================================================================
-   Buttons
+   Buttons: Consolidated 5-Tier System (Resolves Issue 1, 3, 4, 5)
    ========================================================================== */
-.btn {
+.btn,
+.liquid-btn,
+.cat-pill,
+.home-diff-pill,
+.icon-control-btn,
+.sidebar-nav-btn,
+.dash-feature-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
-  border-radius: var(--radius-pill);
-  border: none;
-  font-weight: 800;
+  gap: 8px;
   font-family: inherit;
+  font-weight: 700;
+  font-size: var(--text-base, 1rem);
+  line-height: 1;
+  padding: 0.65rem 1.45rem;
+  min-height: var(--btn-h-md, 46px);
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid transparent;
   cursor: pointer;
-  padding: 0.85rem 1.85rem;
-  font-size: 1.05rem;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.2s var(--spring-bounce, ease), box-shadow 0.2s ease, background-color 0.2s ease;
 }
-.btn-primary {
-  background: #b9b8d0;
-  color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+
+.btn:active,
+.liquid-btn:active {
+  transform: scale(0.96);
 }
-.btn-secondary {
-  background: #F1F5F9;
-  color: var(--text-dark);
-  border: 1.5px solid #CBD5E1;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+
+/* Variant 1: Primary Action (Solid Brand Blue/Indigo) */
+.btn-primary,
+.liquid-btn-primary {
+  background: var(--color-text-brand, #4F46E5) !important;
+  color: var(--color-text-inverse, #FFFFFF) !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
 }
-.btn-danger {
-  background: #EF4444;
-  color: #FFFFFF;
+.btn-primary:hover,
+.liquid-btn-primary:hover {
+  background: #4338CA !important;
 }
-.btn-huge {
-  font-size: 1.35rem;
-  padding: 1.15rem 2.6rem;
+
+/* Variant 2: Secondary / Glass Action (Translucent Frosted Surface) */
+.btn-secondary,
+.liquid-btn-secondary,
+.btn-home,
+.btn-listen-prompt {
+  background: rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--color-text-primary, #0F172A) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
-.btn-sm {
-  font-size: 0.9rem;
-  padding: 0.55rem 1.15rem;
+.btn-secondary:hover,
+.liquid-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Variant 3: Danger / Destructive Action (Coral Red) */
+.btn-danger,
+.liquid-btn--danger {
+  background: var(--color-text-danger, #EF4444) !important;
+  color: var(--color-text-inverse, #FFFFFF) !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+}
+.btn-danger:hover,
+.liquid-btn--danger:hover {
+  background: #DC2626 !important;
+}
+
+/* Variant 4: Ghost / Icon Controls (Navbar controls, close buttons) */
+.icon-control-btn,
+.btn-close,
+.nav-hamburger-btn {
+  padding: 0 !important;
+  width: var(--btn-h-sm, 36px);
+  min-height: var(--btn-h-sm, 36px) !important;
+  background: rgba(255, 255, 255, 0.20) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: var(--color-text-primary, #0F172A) !important;
+}
+
+/* Variant 5: Segmented / Pill Filters (Tabs, categories, difficulty) */
+.cat-pill,
+.home-diff-pill,
+.auth-tab-btn {
+  min-height: var(--btn-h-sm, 36px) !important;
+  padding: 0.35rem 0.95rem !important;
+  font-size: var(--text-sm, 0.875rem) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: var(--color-text-secondary, #334155) !important;
+}
+.cat-pill.active,
+.home-diff-pill.active,
+.auth-tab-btn.active {
+  background: var(--color-text-brand, #4F46E5) !important;
+  color: var(--color-text-inverse, #FFFFFF) !important;
+  border-color: var(--color-text-brand, #4F46E5) !important;
+}
+
+/* Size Modifiers */
+.btn-huge,
+.liquid-btn-huge,
+.liquid-btn-lg {
+  min-height: var(--btn-h-lg, 56px) !important;
+  font-size: var(--text-lg, 1.25rem) !important;
+  padding: 0.95rem 2.2rem !important;
+}
+
+.btn-sm,
+.liquid-btn-sm {
+  min-height: var(--btn-h-sm, 36px) !important;
+  font-size: var(--text-sm, 0.875rem) !important;
+  padding: 0.35rem 0.9rem !important;
 }
 
 /* Print Styles */
@@ -2441,11 +2572,11 @@ body.reduced-motion * {
 
 .drawer-brand-subtitle {
   display: block;
-  font-size: 0.78rem;
+  font-size: var(--text-xs, 0.78rem);
   font-weight: 600;
-  color: #6366F1;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--color-text-brand, #6366F1);
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 .nav-drawer-close-btn {
