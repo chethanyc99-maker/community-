@@ -13,7 +13,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Prerana">
 
-  <link rel="stylesheet" href="styles/main.css?v=16">
+  <link rel="stylesheet" href="styles/main.css?v=20">
+  <link rel="stylesheet" href="styles/playground.css?v=2">
   <style>
     .hidden,
     body.auth-locked .top-nav,
@@ -93,9 +94,9 @@
           <span class="ctrl-icon">🔊</span><span class="ctrl-text">Voice</span>
         </button>
 
-        <!-- High Contrast Toggle -->
-        <button id="btn-toggle-contrast" class="icon-control-btn" title="High Contrast Mode" aria-pressed="false">
-          <span class="ctrl-icon">🌓</span><span class="ctrl-text">Contrast</span>
+        <!-- Light / Dark Mode Toggle -->
+        <button id="btn-toggle-contrast" class="icon-control-btn theme-toggle-btn" title="Toggle Dark / Light Mode" aria-label="Toggle Dark / Light Mode" aria-pressed="false">
+          <span class="ctrl-icon" id="theme-toggle-icon">🌙</span><span class="ctrl-text" id="theme-toggle-text">Dark</span>
         </button>
 
         <!-- Dedicated Sign Out Button (Visible only when logged in) -->
@@ -133,6 +134,15 @@
           <div class="drawer-item-text">
             <span class="drawer-item-title">View Activities</span>
             <span class="drawer-item-sub">Play &amp; learn</span>
+          </div>
+        </button>
+
+        <!-- 2. Tactile Playground (Study Break / Creative Lab) -->
+        <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="playground" role="tab" aria-selected="false">
+          <span class="drawer-item-icon">🧪</span>
+          <div class="drawer-item-text">
+            <span class="drawer-item-title">Tactile Playground</span>
+            <span class="drawer-item-sub">Creative Lab &amp; Study Break</span>
           </div>
         </button>
 
@@ -194,8 +204,8 @@
         <button type="button" class="dash-feature-btn drawer-nav-item" data-dash-tab="settings" role="tab" aria-selected="false">
           <span class="drawer-item-icon">⚙️</span>
           <div class="drawer-item-text">
-            <span class="drawer-item-title">Accessibility Settings</span>
-            <span class="drawer-item-sub">Sound &amp; contrast</span>
+            <span class="drawer-item-title">Accessibility &amp; Theme</span>
+            <span class="drawer-item-sub">Sound &amp; dark mode</span>
           </div>
         </button>
 
@@ -241,8 +251,7 @@
             </div>
 
             <!-- Segmented Role Switcher: Student / Teacher / Admin -->
-            <div class="auth-segmented-nav liquid-segmented-control" role="tablist">
-              <div class="liquid-segment-indicator" id="auth-segment-indicator"></div>
+            <div class="auth-segmented-nav" role="tablist">
               <button class="auth-tab-btn active" id="tab-btn-student" role="tab" aria-selected="true" data-tab="student">
                 <span class="tab-text">Student</span>
               </button>
@@ -256,12 +265,6 @@
 
             <!-- TAB 1: Student Login Panel (Only Student login details) -->
             <div class="auth-tab-panel active" id="tab-panel-student" role="tabpanel">
-              <!-- Student Login Mode Toggle: Password vs Picture Login -->
-              <div class="student-login-mode-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; background: #EEF2FF; padding: 4px; border-radius: 14px;">
-                <button type="button" id="btn-mode-standard-login" class="liquid-btn liquid-btn-sm active" style="flex: 1; padding: 6px; font-size: 0.82rem; border-radius: 10px;">🔑 Password Login</button>
-                <button type="button" id="btn-mode-picture-login" class="liquid-btn liquid-btn-sm" style="flex: 1; padding: 6px; font-size: 0.82rem; border-radius: 10px; background: transparent; color: #4338CA;">🎨 Picture Login</button>
-              </div>
-
               <!-- Standard Password Form -->
               <form id="form-student-login" class="auth-form" onsubmit="return false;">
                 <div class="form-group">
@@ -288,37 +291,6 @@
                 <div class="form-actions">
                   <button type="submit" id="btn-submit-student-login" class="btn btn-primary btn-large" style="width: 100%;">
                     <span class="btn-label">Login</span>
-                  </button>
-                </div>
-              </form>
-
-              <!-- Accessible Picture Login Form (Zero-Typing for Special Needs) -->
-              <form id="form-student-picture-login" class="auth-form hidden" onsubmit="return false;">
-                <div class="form-group" style="text-align: center;">
-                  <label style="display: block; margin-bottom: 0.4rem; font-weight: 700; color: #1E1B4B;">1. Tap Your Friendly Mascot Avatar:</label>
-                  <div class="mascot-selection-grid" id="login-picture-mascots" style="display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;">
-                    <button type="button" class="btn-picture-mascot active" data-mascot="🌟" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #4F46E5; border-radius: 14px; background: #EEF2FF; cursor: pointer;">🌟</button>
-                    <button type="button" class="btn-picture-mascot" data-mascot="🦁" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🦁</button>
-                    <button type="button" class="btn-picture-mascot" data-mascot="🦋" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🦋</button>
-                    <button type="button" class="btn-picture-mascot" data-mascot="🐰" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐰</button>
-                    <button type="button" class="btn-picture-mascot" data-mascot="🐻" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐻</button>
-                    <button type="button" class="btn-picture-mascot" data-mascot="🐬" style="font-size: 1.7rem; padding: 0.4rem 0.6rem; border: 2px solid #CBD5E1; border-radius: 14px; background: #FFFFFF; cursor: pointer;">🐬</button>
-                  </div>
-                </div>
-
-                <div class="form-group" style="text-align: center; margin-top: 0.8rem;">
-                  <label style="display: block; margin-bottom: 0.4rem; font-weight: 700; color: #1E1B4B;">2. Tap Your Favorite Color:</label>
-                  <div class="color-selection-grid" id="login-picture-colors" style="display: flex; justify-content: center; gap: 0.6rem;">
-                    <button type="button" class="btn-picture-color active" data-color="blue" style="width: 36px; height: 36px; border-radius: 50%; background: #3B82F6; border: 3px solid #1E40AF; cursor: pointer;" title="Blue"></button>
-                    <button type="button" class="btn-picture-color" data-color="red" style="width: 36px; height: 36px; border-radius: 50%; background: #EF4444; border: 2px solid #B91C1C; cursor: pointer;" title="Red"></button>
-                    <button type="button" class="btn-picture-color" data-color="green" style="width: 36px; height: 36px; border-radius: 50%; background: #10B981; border: 2px solid #047857; cursor: pointer;" title="Green"></button>
-                    <button type="button" class="btn-picture-color" data-color="yellow" style="width: 36px; height: 36px; border-radius: 50%; background: #F59E0B; border: 2px solid #B45309; cursor: pointer;" title="Yellow"></button>
-                  </div>
-                </div>
-
-                <div class="form-actions" style="margin-top: 1rem;">
-                  <button type="button" id="btn-submit-picture-login" class="liquid-btn liquid-btn-primary liquid-btn-lg" style="width: 100%;">
-                    <span class="btn-label">🚀 Enter My Learning Game</span>
                   </button>
                 </div>
               </form>
@@ -821,6 +793,16 @@
           <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Let's Start ➡️</span>
         </div>
 
+        <!-- 13. Tactile Playground (Study Break / Creative Lab) -->
+        <div class="activity-card glass-panel glass-card card-playground" data-module="playground" data-category="creative" role="button" tabindex="0">
+          <button type="button" class="card-fav-btn" data-fav-module="playground" aria-label="Favorite Tactile Playground">🤍</button>
+          <span class="card-done-badge hidden" data-done-module="playground">✓ Played</span>
+          <div class="card-art">🧪</div>
+          <h3 class="card-title">Tactile Playground</h3>
+          <p class="card-desc">Interactive sensory break with sound pads, physics sandbox, kinetic text &amp; magnetic dial!</p>
+          <span class="card-play-tag liquid-btn liquid-btn-primary liquid-btn-sm">Enter Lab ➡️</span>
+        </div>
+
         <!-- 13. Teacher's Custom Flashcards -->
         <div class="activity-card glass-panel glass-card card-custom-teacher" data-module="custom_teacher" data-category="basics" role="button" tabindex="0" style="border: 2px dashed rgba(79, 70, 229, 0.45); background: linear-gradient(135deg, rgba(238, 242, 255, 0.95), rgba(224, 231, 255, 0.85));">
           <button type="button" class="card-fav-btn" data-fav-module="custom_teacher" aria-label="Favorite Teacher Flashcards">🤍</button>
@@ -1296,6 +1278,7 @@
   <script src="scripts/modules/calming.js?v=11"></script>
   <script src="scripts/modules/catalog-activities.js?v=11"></script>
   <script src="scripts/modules/special-activities.js?v=11"></script>
-  <script src="scripts/app.js?v=12"></script>
+  <script src="scripts/modules/playground.js?v=2"></script>
+  <script src="scripts/app.js?v=16"></script>
 </body>
 </html>

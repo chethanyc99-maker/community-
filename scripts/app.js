@@ -52,6 +52,7 @@ class AppController {
       counting: '🧺 Quick Count Fun',
       sounds: '🔔 Listen & Match',
       calming: '🫧 Pop Bubbles',
+      playground: '🧪 Tactile Playground',
       custom_teacher: "🎨 Teacher's Lessons"
     };
     this.activeDashTab = 'activities';
@@ -80,8 +81,7 @@ class AppController {
     this.initPWA();
     this.initNetworkStatus();
     this.initHeaderScrollEffect();
-    window.addEventListener('resize', () => this.updateAuthSegmentIndicator());
-    setTimeout(() => this.updateAuthSegmentIndicator(), 60);
+    this.initThemeMode();
 
     window.addEventListener('prerana:dashboard-updated', (e) => {
       this.syncStudentDashboardUI(e.detail);
@@ -111,6 +111,53 @@ class AppController {
     if (!header) return;
     const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
     header.classList.toggle('is-scrolled', scrollTop > 10 && !header.classList.contains('hidden'));
+  }
+
+  initThemeMode() {
+    let isDark = false;
+    try {
+      const saved = localStorage.getItem('prerana_theme');
+      if (saved) {
+        isDark = (saved === 'dark');
+      } else {
+        const storedSettings = window.iepStorage?.getSettings?.() || {};
+        isDark = Boolean(storedSettings.highContrast || storedSettings.darkMode);
+      }
+    } catch (_) {}
+    this.setThemeMode(isDark, false);
+  }
+
+  setThemeMode(isDark, notify = false) {
+    const shouldBeDark = Boolean(isDark);
+    document.body.classList.toggle('theme-dark', shouldBeDark);
+    document.body.classList.toggle('theme-high-contrast', shouldBeDark);
+
+    const btn = document.getElementById('btn-toggle-contrast');
+    if (btn) {
+      btn.classList.toggle('active', shouldBeDark);
+      btn.setAttribute('aria-pressed', shouldBeDark.toString());
+      btn.title = shouldBeDark ? "Switch to Light Mode" : "Switch to Dark Mode";
+      const icon = btn.querySelector('.ctrl-icon') || document.getElementById('theme-toggle-icon');
+      const text = btn.querySelector('.ctrl-text') || document.getElementById('theme-toggle-text');
+      if (icon) icon.textContent = shouldBeDark ? "☀️" : "🌙";
+      if (text) text.textContent = shouldBeDark ? "Light" : "Dark";
+    }
+
+    const chk = document.getElementById('chk-a11y-contrast');
+    if (chk) {
+      chk.checked = shouldBeDark;
+    }
+
+    try {
+      localStorage.setItem('prerana_theme', shouldBeDark ? 'dark' : 'light');
+    } catch (_) {}
+
+    window.iepStorage?.saveSettingsRemote({ highContrast: shouldBeDark, darkMode: shouldBeDark });
+
+    if (notify) {
+      window.soundFx?.playPop();
+      window.speechAssistant?.speak(shouldBeDark ? "Dark theme on" : "Light theme on");
+    }
   }
 
   async checkInitialSession() {
@@ -255,8 +302,6 @@ class AppController {
       }
     });
 
-    window.requestAnimationFrame(() => this.updateAuthSegmentIndicator(tabBtns[tabName]));
-
     // Toggle active/hidden on portal panels (only active section shown)
     Object.keys(panels).forEach(key => {
       if (panels[key]) {
@@ -269,16 +314,6 @@ class AppController {
         }
       }
     });
-  }
-
-  updateAuthSegmentIndicator(targetBtn = null) {
-    const segNav = document.querySelector('.liquid-segmented-control');
-    const indicator = document.getElementById('auth-segment-indicator');
-    if (!segNav || !indicator) return;
-    const activeBtn = targetBtn || segNav.querySelector('.auth-tab-btn.active') || segNav.querySelector('.auth-tab-btn');
-    if (!activeBtn || activeBtn.offsetWidth <= 0) return;
-    indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
   }
 
   showAuthAlert(message, type = 'error') {
@@ -464,64 +499,6 @@ class AppController {
       }
     });
 
-    // Student Login Mode Switcher: Password vs Picture Login
-    const btnModeStandard = document.getElementById('btn-mode-standard-login');
-    const btnModePicture = document.getElementById('btn-mode-picture-login');
-    const formStandard = document.getElementById('form-student-login');
-    const formPicture = document.getElementById('form-student-picture-login');
-
-    btnModeStandard?.addEventListener('click', () => {
-      btnModeStandard.classList.add('active');
-      btnModeStandard.style.background = '#FFFFFF';
-      btnModePicture?.classList.remove('active');
-      if (btnModePicture) btnModePicture.style.background = 'transparent';
-      formStandard?.classList.remove('hidden');
-      formPicture?.classList.add('hidden');
-      window.soundFx?.playPop();
-    });
-
-    btnModePicture?.addEventListener('click', () => {
-      btnModePicture.classList.add('active');
-      btnModePicture.style.background = '#FFFFFF';
-      btnModeStandard?.classList.remove('active');
-      if (btnModeStandard) btnModeStandard.style.background = 'transparent';
-      formPicture?.classList.remove('hidden');
-      formStandard?.classList.add('hidden');
-      window.soundFx?.playPop();
-      window.speechAssistant?.speak('Tap your mascot and favorite color to sign in!', true);
-    });
-
-    // Picture Mascot Selection
-    document.querySelectorAll('.btn-picture-mascot').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.btn-picture-mascot').forEach(b => {
-          b.classList.remove('active');
-          b.style.borderColor = '#CBD5E1';
-          b.style.background = '#FFFFFF';
-        });
-        btn.classList.add('active');
-        btn.style.borderColor = '#4F46E5';
-        btn.style.background = '#EEF2FF';
-        this.selectedPictureMascot = btn.dataset.mascot || '🌟';
-        window.soundFx?.playPop();
-      });
-    });
-
-    // Picture Color Selection
-    document.querySelectorAll('.btn-picture-color').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.btn-picture-color').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.selectedPictureColor = btn.dataset.color || 'blue';
-        window.soundFx?.playPop();
-      });
-    });
-
-    // Picture Login Submit
-    document.getElementById('btn-submit-picture-login')?.addEventListener('click', async () => {
-      await this.handlePictureLogin();
-    });
-
     // Multi-Language Selector
     document.getElementById('select-app-language')?.addEventListener('change', (e) => {
       const lang = e.target.value;
@@ -665,46 +642,6 @@ class AppController {
       remember,
       submitBtn
     });
-  }
-
-  async handlePictureLogin() {
-    const avatar = this.selectedPictureMascot || '🌟';
-    const color_code = this.selectedPictureColor || 'blue';
-    const submitBtn = document.getElementById('btn-submit-picture-login');
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = '🚀 Entering...';
-    }
-
-    try {
-      const res = await fetch('/api/auth/picture-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ avatar, color_code })
-      });
-      const data = await res.json();
-      if (res.ok && data.success && data.user) {
-        this.clearAuthAlert();
-        this.authenticatedUser = data.user;
-        window.iepStorage.setActiveSession(data.user);
-        this.setRole('student', null, data.user);
-        window.soundFx?.playSuccess();
-        window.speechAssistant?.speak(`Welcome ${data.user.full_name}! Let's learn together!`, true);
-      } else {
-        this.showAuthAlert(data.message || 'Mascot and color combination not recognized. Please try again!');
-        window.soundFx?.playError();
-      }
-    } catch (err) {
-      console.error('Picture login error:', err);
-      this.showAuthAlert('Unable to connect to server for Picture Login.');
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '🚀 Enter My Learning Game';
-      }
-    }
   }
 
   async handleStudentRegister() {
@@ -1353,17 +1290,22 @@ class AppController {
       if (!logs.length) {
         logsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.2rem;">No student activities recorded yet in this session.</td></tr>`;
       } else {
-        logsTbody.innerHTML = logs.map(l => `
-          <tr>
-            <td><small>${l.timestamp}</small></td>
-            <td><strong>${l.studentName || 'Student'}</strong></td>
-            <td>${l.moduleName}</td>
-            <td>${l.objective}</td>
-            <td><span style="color: ${l.status.includes('First-Try') ? '#10B981' : '#F59E0B'}; font-weight:800;">${l.status}</span></td>
-            <td>${l.attempts}</td>
-            <td>${l.responseTimeSec}s</td>
-          </tr>
-        `).join('');
+        logsTbody.innerHTML = logs.map(l => {
+          const statusStr = l.status || 'Completed';
+          const isFirstTry = statusStr.includes('First');
+          const formattedTime = String(l.timestamp || '').replace('T', ' ');
+          return `
+            <tr>
+              <td><small>${formattedTime}</small></td>
+              <td><strong>${l.studentName || 'Student'}</strong></td>
+              <td>${l.moduleName}</td>
+              <td>${l.objective}</td>
+              <td><span class="log-status-badge ${isFirstTry ? 'status-pass' : 'status-warn'}" style="color: ${isFirstTry ? '#10B981' : '#F59E0B'}; font-weight:800;">${statusStr}</span></td>
+              <td>${l.attempts}</td>
+              <td>${l.responseTimeSec}s</td>
+            </tr>
+          `;
+        }).join('');
       }
     }
 
@@ -1728,6 +1670,9 @@ class AppController {
     if (this.currentModuleKey === 'calming' && window.calmingModule) {
       window.calmingModule.destroy();
     }
+    if (this.currentModuleKey === 'playground' && window.playgroundModule) {
+      window.playgroundModule.destroy();
+    }
     window.soundFx?.stopMelody();
     this.viewHome?.classList.remove('hidden');
     this.viewPlay?.classList.add('hidden');
@@ -1745,6 +1690,9 @@ class AppController {
   openModule(moduleKey) {
     if (this.currentModuleKey === 'calming' && window.calmingModule) {
       window.calmingModule.destroy();
+    }
+    if (this.currentModuleKey === 'playground' && window.playgroundModule) {
+      window.playgroundModule.destroy();
     }
     window.soundFx?.stopMelody();
 
@@ -1777,7 +1725,8 @@ class AppController {
       emotions: window.emotionsModule,
       counting: window.countingModule,
       sounds: window.soundsModule,
-      calming: window.calmingModule
+      calming: window.calmingModule,
+      playground: window.playgroundModule
     };
 
     const mod = moduleMap[moduleKey] || window.alphabetModule || window.shapesModule;
@@ -2028,6 +1977,10 @@ class AppController {
         if (typeof this.closeNavDrawer === 'function') {
           this.closeNavDrawer();
         }
+        if (tab === 'playground') {
+          this.openModule('playground');
+          return;
+        }
         if (this.currentView !== 'home' && tab !== 'teacher') {
           this.showHomeView();
         }
@@ -2075,7 +2028,19 @@ class AppController {
     const settings = state.settings || {};
 
     // Apply Accessibility Preferences globally
-    document.body.classList.toggle('theme-high-contrast', Boolean(settings.highContrast));
+    let isDarkTheme = false;
+    try {
+      const savedTheme = localStorage.getItem('prerana_theme');
+      if (savedTheme) {
+        isDarkTheme = (savedTheme === 'dark');
+      } else {
+        isDarkTheme = Boolean(settings.highContrast || settings.darkMode);
+      }
+    } catch (_) {
+      isDarkTheme = Boolean(settings.highContrast || settings.darkMode);
+    }
+    this.setThemeMode(isDarkTheme, false);
+
     document.body.classList.toggle('font-dyslexic', Boolean(settings.dyslexicFont));
     document.body.classList.toggle('font-standard', !settings.dyslexicFont);
     document.body.classList.toggle('reduced-motion', Boolean(settings.reducedMotion));
@@ -2095,7 +2060,6 @@ class AppController {
 
     // Update top header Accessibility toggles visual state
     document.getElementById('btn-toggle-tts')?.classList.toggle('active', settings.voiceEnabled !== false);
-    document.getElementById('btn-toggle-contrast')?.classList.toggle('active', Boolean(settings.highContrast));
 
     // Update Quick Stats & Stars
     const starEl = document.getElementById('star-count');
@@ -2496,9 +2460,9 @@ class AppController {
           </div>
 
           <div class="a11y-card glass-card">
-            <strong>🌗 High Contrast & Typography</strong>
+            <strong>🌙 Theme & Typography</strong>
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-contrast" ${s.highContrast ? 'checked' : ''} style="width:20px; height:20px;"> High Contrast Colors
+              <input type="checkbox" id="chk-a11y-contrast" ${s.highContrast || s.darkMode || document.body.classList.contains('theme-dark') ? 'checked' : ''} style="width:20px; height:20px;"> 🌙 Dark Theme (Apollo Slate)
             </label>
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
               <input type="checkbox" id="chk-a11y-dyslexic" ${s.dyslexicFont ? 'checked' : ''} style="width:20px; height:20px;"> Dyslexia-Friendly Font
@@ -2561,7 +2525,9 @@ class AppController {
           window.iepStorage.saveSettingsRemote({ [key]: e.target.checked });
         });
       };
-      bindToggle('#chk-a11y-contrast', 'highContrast');
+      panel.querySelector('#chk-a11y-contrast')?.addEventListener('change', (e) => {
+        this.setThemeMode(e.target.checked, true);
+      });
       bindToggle('#chk-a11y-dyslexic', 'dyslexicFont');
       bindToggle('#chk-a11y-voice', 'voiceEnabled');
       bindToggle('#chk-a11y-sound', 'soundEnabled');
@@ -2672,12 +2638,8 @@ class AppController {
 
     const btnContrast = document.getElementById('btn-toggle-contrast');
     btnContrast?.addEventListener('click', () => {
-      document.body.classList.toggle('theme-high-contrast');
-      const isHigh = document.body.classList.contains('theme-high-contrast');
-      btnContrast.classList.toggle('active', isHigh);
-      btnContrast.setAttribute('aria-pressed', isHigh.toString());
-      window.iepStorage?.saveSettingsRemote({ highContrast: isHigh });
-      window.speechAssistant?.speak(isHigh ? "High contrast on" : "Normal colors on");
+      const isCurrentlyDark = document.body.classList.contains('theme-dark') || document.body.classList.contains('theme-high-contrast');
+      this.setThemeMode(!isCurrentlyDark, true);
     });
   }
 
