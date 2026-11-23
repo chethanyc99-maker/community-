@@ -52,6 +52,7 @@ class AppController {
       counting: '🧺 Quick Count Fun',
       sounds: '🔔 Listen & Match',
       calming: '🫧 Pop Bubbles',
+      playground: '🧪 Tactile Playground',
       custom_teacher: "🎨 Teacher's Lessons"
     };
     this.activeDashTab = 'activities';
@@ -1728,6 +1729,9 @@ class AppController {
     if (this.currentModuleKey === 'calming' && window.calmingModule) {
       window.calmingModule.destroy();
     }
+    if (this.currentModuleKey === 'playground' && window.playgroundModule) {
+      window.playgroundModule.destroy();
+    }
     window.soundFx?.stopMelody();
     this.viewHome?.classList.remove('hidden');
     this.viewPlay?.classList.add('hidden');
@@ -1745,6 +1749,9 @@ class AppController {
   openModule(moduleKey) {
     if (this.currentModuleKey === 'calming' && window.calmingModule) {
       window.calmingModule.destroy();
+    }
+    if (this.currentModuleKey === 'playground' && window.playgroundModule) {
+      window.playgroundModule.destroy();
     }
     window.soundFx?.stopMelody();
 
@@ -1777,7 +1784,8 @@ class AppController {
       emotions: window.emotionsModule,
       counting: window.countingModule,
       sounds: window.soundsModule,
-      calming: window.calmingModule
+      calming: window.calmingModule,
+      playground: window.playgroundModule
     };
 
     const mod = moduleMap[moduleKey] || window.alphabetModule || window.shapesModule;
@@ -2027,6 +2035,10 @@ class AppController {
         // Automatically close the menu drawer whenever user clicks a section
         if (typeof this.closeNavDrawer === 'function') {
           this.closeNavDrawer();
+        }
+        if (tab === 'playground') {
+          this.openModule('playground');
+          return;
         }
         if (this.currentView !== 'home' && tab !== 'teacher') {
           this.showHomeView();

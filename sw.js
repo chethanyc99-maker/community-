@@ -3,19 +3,20 @@
  * Provides offline-first resilience across mobile networks (4G/5G), Wi-Fi, LAN, and Ethernet.
  */
 
-const CACHE_NAME = 'prerana-cache-v25';
+const CACHE_NAME = 'prerana-cache-v26';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './styles/main.css?v=16',
+  './styles/playground.css?v=1',
   './scripts/assistive-access.js?v=1',
   './scripts/i18n.js?v=1',
   './scripts/audio.js?v=9',
   './scripts/tts.js?v=9',
   './scripts/storage.js?v=9',
-  './scripts/app.js?v=12',
+  './scripts/app.js?v=13',
   './scripts/modules/shapes.js?v=11',
   './scripts/modules/daily-skills.js?v=11',
   './scripts/modules/emotions.js?v=11',
@@ -23,7 +24,8 @@ const STATIC_ASSETS = [
   './scripts/modules/sounds.js?v=11',
   './scripts/modules/calming.js?v=11',
   './scripts/modules/catalog-activities.js?v=11',
-  './scripts/modules/special-activities.js?v=11'
+  './scripts/modules/special-activities.js?v=11',
+  './scripts/modules/playground.js?v=1'
 ];
 
 self.addEventListener('install', (event) => {
