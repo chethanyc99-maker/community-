@@ -1,0 +1,25 @@
+name: Keep Render Service Awake 24/7
+
+on:
+  schedule:
+    # Ping every 10 minutes to prevent Render free-tier 15-minute idle spin-down
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Prerana Healthcheck Endpoint
+        env:
+          RENDER_APP_URL: ${{ vars.RENDER_APP_URL }}
+        run: |
+          if [ -z "$RENDER_APP_URL" ]; then
+            echo "RENDER_APP_URL repository variable is not set yet. Set it under Settings -> Secrets and variables -> Actions -> Variables."
+            exit 0
+          fi
+          TARGET_URL="${RENDER_APP_URL%/}/api/health"
+          echo "Pinging $TARGET_URL ..."
+          curl --fail --silent --show-error --max-time 25 "$TARGET_URL"
+          echo ""
+          echo "Keep-alive ping succeeded."

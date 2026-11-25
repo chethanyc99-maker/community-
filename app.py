@@ -6,12 +6,14 @@ Directly serves existing index.html and powers MySQL authentication via API.
 
 import os
 import socket
+import ipaddress
 from functools import wraps
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from pathlib import Path
 from flask import (
     Flask, send_from_directory, request, jsonify, session, make_response
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import database
 import pdf_generator
@@ -26,11 +28,14 @@ app = Flask(
     static_folder=".",
     static_url_path=""
 )
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 app.secret_key = os.getenv("SECRET_KEY", "prerana_apple_liquid_glass_2026_idd_secure")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=14)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+if os.getenv("RENDER") or os.getenv("FORCE_HTTPS_COOKIES"):
+    app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 @app.after_request
@@ -41,9 +46,16 @@ def add_no_cache_headers(response):
     response.headers["Expires"] = "0"
     return response
 
+@app.before_request
+def ensure_backend_db_ready():
+    """Self-heal DB tables & seed users if Cloud MySQL was warming up during cold boot."""
+    if request.path.startswith("/api/") and request.path not in ("/api/health", "/api/network-info"):
+        if not database.is_initialized():
+            database.ensure_db_initialized()
+
 # Initialize MySQL Database on server start
 with app.app_context():
-    database.init_db()
+    database.ensure_db_initialized()
 
 def get_primary_ip():
     """Detect local LAN/Wi-Fi IP for multi-device network sharing."""
@@ -567,27 +579,73 @@ def api_adaptive_evaluation(student_id):
     evaluation = adaptive_ai.evaluate_student_cognitive_state(student_id, logs, current_tier)
     return jsonify({"success": True, "student": user, "adaptive_analysis": evaluation})
 
+def _is_private_or_local_host(hostname):
+    host = (hostname or "").split(":")[0].strip().lower()
+    if host in ("localhost", "127.0.0.1", "::1", ""):
+        return True
+    try:
+        ip_obj = ipaddress.ip_address(host)
+        return ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local
+    except ValueError:
+        return False
+
 @app.route("/api/network-info", methods=["GET"])
 def network_info():
-    """Returns local network IP for cross-device Wi-Fi/LAN connection."""
-    primary_ip = get_primary_ip()
+    """Returns active public HTTPS URL (when deployed) or LAN IP for cross-device sharing."""
     port = int(os.getenv("PORT", 5000))
+    render_url = (os.getenv("RENDER_EXTERNAL_URL") or "").strip().rstrip("/")
+    req_origin = (request.host_url or "").strip().rstrip("/")
+    req_host = (request.host or "").split(":")[0].strip().lower()
+
+    if render_url:
+        share_url = render_url
+        mode = "cloud"
+    elif req_origin.startswith("http") and not _is_private_or_local_host(req_host):
+        share_url = req_origin
+        mode = "cloud"
+    else:
+        primary_ip = get_primary_ip()
+        share_url = f"http://{primary_ip}:{port}"
+        mode = "lan"
+
+    primary_ip = get_primary_ip()
     return jsonify({
+        "mode": mode,
         "primary_ip": primary_ip,
         "port": port,
-        "network_url": f"http://{primary_ip}:{port}",
+        "network_url": share_url,
         "local_url": f"http://localhost:{port}"
     })
+
+@app.route("/api/health", methods=["GET"])
+@app.route("/healthz", methods=["GET"])
+def healthcheck():
+    """Lightweight 24/7 healthcheck and keep-alive endpoint for Render & Uptime Monitors."""
+    db_connected = False
+    try:
+        db_conn = database.get_db_connection(timeout=3)
+        if db_conn and db_conn.is_connected():
+            db_connected = True
+            db_conn.close()
+    except Exception:
+        db_connected = False
+
+    return jsonify({
+        "status": "ok",
+        "service": "prerana-assistive-platform",
+        "db_connected": db_connected,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }), 200
 
 @app.route("/api/db-status", methods=["GET"])
 def db_status():
     """Healthcheck endpoint returning MySQL connection parameters and status."""
-    db_conn = database.get_db_connection()
+    db_conn = database.get_db_connection(timeout=5)
     connected = db_conn is not None and db_conn.is_connected()
     if db_conn:
         db_conn.close()
     return jsonify({
-        "database_type": "MySQL (MySQL80)",
+        "database_type": "MySQL (Cloud/Local)",
         "connected": connected,
         "host": database.DB_CONFIG.get("host"),
         "port": database.DB_CONFIG.get("port"),
@@ -598,13 +656,14 @@ def db_status():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     primary_ip = get_primary_ip()
+    is_prod = os.getenv("FLASK_ENV", "").lower() == "production"
     print("=" * 68)
     print("  PRERANA SPECIAL EDUCATION LEARNING PLATFORM - FLASK + MYSQL")
-    print(f"  MySQL Server: {database.DB_CONFIG['host']}:{database.DB_CONFIG['port']} (MySQL80)")
+    print(f"  MySQL Server: {database.DB_CONFIG['host']}:{database.DB_CONFIG['port']}")
     print(f"  Database:     {database.DB_CONFIG['database']}")
     print(f"  DB User:      {database.DB_CONFIG['user']}")
     print("=" * 68)
     print(f"  Local URL:   http://localhost:{port}")
     print(f"  Network URL: http://{primary_ip}:{port} (Wi-Fi / LAN)")
     print("=" * 68)
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=not is_prod)

@@ -1,5 +1,6 @@
 import os
 import json
+import threading
 from datetime import date, datetime, timedelta
 import mysql.connector
 from mysql.connector import Error
@@ -7,23 +8,26 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from pathlib import Path
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 # Load environment configuration
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env", override=True)
 
+_db_initialized = False
+_db_init_lock = threading.Lock()
+
 # ==============================================================================
-# DATABASE CONFIGURATION - Local MySQL Server / Cloud Managed MySQL (Aiven)
-# Supports individual environment variables OR a unified Aiven Service URI
+# DATABASE CONFIGURATION - Local MySQL Server / Cloud Managed MySQL (Aiven/TiDB/Railway)
+# Supports individual environment variables OR a unified MySQL connection URI
 # ==============================================================================
 _db_url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL")
 if _db_url:
     _parsed = urlparse(_db_url)
     _host = _parsed.hostname or "localhost"
     _port = _parsed.port or 3306
-    _user = _parsed.username or "root"
-    _password = _parsed.password or "C1h2e3t4h5a6n7@"
+    _user = unquote(_parsed.username) if _parsed.username else "root"
+    _password = unquote(_parsed.password) if _parsed.password else ""
     _db = _parsed.path.lstrip("/") if _parsed.path and len(_parsed.path) > 1 else "computer_based_learning"
 else:
     _host = os.getenv("MYSQL_HOST", "localhost")
@@ -40,21 +44,45 @@ DB_CONFIG = {
     "database": _db
 }
 
+def _is_local_host(host):
+    return (host or "").strip().lower() in ("localhost", "127.0.0.1", "::1", "")
+
 def _resolve_connection_passwords():
-    """Returns candidate passwords to try, prioritizing user configuration."""
+    """Returns candidate passwords to try, prioritizing configured credentials."""
     passwords = []
     env_pwd = os.getenv("MYSQL_PASSWORD") or os.getenv("DB_PASSWORD")
     if env_pwd:
         passwords.append(env_pwd)
     cfg_pwd = DB_CONFIG.get("password")
-    if cfg_pwd and cfg_pwd not in passwords:
+    if cfg_pwd is not None and cfg_pwd not in passwords:
         passwords.append(cfg_pwd)
-    if "C1h2e3t4h5a6n7@" not in passwords:
+    if _is_local_host(DB_CONFIG.get("host")) and "C1h2e3t4h5a6n7@" not in passwords:
         passwords.append("C1h2e3t4h5a6n7@")
     return passwords
 
-def get_server_connection():
-    """Connect to MySQL server (MySQL80) without selecting a specific database."""
+def _build_connect_kwargs(host, port, user, password, db_name=None, timeout=10):
+    """Build MySQL connector options with cloud TLS and fast fail timeout."""
+    connect_kwargs = {
+        "host": host,
+        "port": port,
+        "user": user,
+        "password": password,
+        "connection_timeout": int(os.getenv("MYSQL_CONNECT_TIMEOUT", str(timeout)))
+    }
+    if db_name:
+        connect_kwargs["database"] = db_name
+    if not _is_local_host(host):
+        connect_kwargs["ssl_disabled"] = False
+        ssl_ca = (os.getenv("MYSQL_SSL_CA") or "").strip()
+        if ssl_ca and os.path.exists(ssl_ca):
+            connect_kwargs["ssl_ca"] = ssl_ca
+            connect_kwargs["ssl_verify_cert"] = True
+        elif os.getenv("MYSQL_SSL_VERIFY", "").lower() in ("1", "true", "yes"):
+            connect_kwargs["ssl_verify_cert"] = True
+    return connect_kwargs
+
+def get_server_connection(timeout=10):
+    """Connect to MySQL server without selecting a specific database."""
     host = DB_CONFIG.get("host", "localhost")
     port = int(DB_CONFIG.get("port", 3306))
     user = DB_CONFIG.get("user", "root")
@@ -62,15 +90,9 @@ def get_server_connection():
     last_error = None
     for pwd in _resolve_connection_passwords():
         try:
-            connect_kwargs = {
-                "host": host,
-                "port": port,
-                "user": user,
-                "password": pwd
-            }
-            if host not in ("localhost", "127.0.0.1"):
-                connect_kwargs["ssl_disabled"] = False
-            conn = mysql.connector.connect(**connect_kwargs)
+            conn = mysql.connector.connect(
+                **_build_connect_kwargs(host, port, user, pwd, timeout=timeout)
+            )
             return conn
         except Error as e:
             last_error = e
@@ -78,8 +100,8 @@ def get_server_connection():
     print(f"[ERROR] Could not connect to MySQL server at {host}:{port} -> {last_error}")
     return None
 
-def get_db_connection():
-    """Connect directly to the application database (computer_based_learning)."""
+def get_db_connection(timeout=10):
+    """Connect directly to the configured application database."""
     host = DB_CONFIG.get("host", "localhost")
     port = int(DB_CONFIG.get("port", 3306))
     user = DB_CONFIG.get("user", "root")
@@ -88,16 +110,9 @@ def get_db_connection():
     last_error = None
     for pwd in _resolve_connection_passwords():
         try:
-            connect_kwargs = {
-                "host": host,
-                "port": port,
-                "user": user,
-                "password": pwd,
-                "database": db_name
-            }
-            if host not in ("localhost", "127.0.0.1"):
-                connect_kwargs["ssl_disabled"] = False
-            conn = mysql.connector.connect(**connect_kwargs)
+            conn = mysql.connector.connect(
+                **_build_connect_kwargs(host, port, user, pwd, db_name=db_name, timeout=timeout)
+            )
             return conn
         except Error as e:
             last_error = e
@@ -105,16 +120,30 @@ def get_db_connection():
     print(f"[ERROR] Could not connect to MySQL database '{db_name}' -> {last_error}")
     return None
 
+def is_initialized():
+    return _db_initialized
+
+def ensure_db_initialized():
+    """Thread-safe lazy initializer so cloud restarts recover automatically."""
+    global _db_initialized
+    if _db_initialized:
+        return True
+    with _db_init_lock:
+        if _db_initialized:
+            return True
+        return init_db()
+
 def init_db():
     """
-    Initializes MySQL database, creates users table, and seeds sample accounts.
+    Initializes MySQL database, creates tables if missing, and seeds default accounts.
     """
+    global _db_initialized
     db_name = DB_CONFIG.get("database", "computer_based_learning")
     host = DB_CONFIG.get("host", "localhost")
 
-    # Try connecting directly to the database first (essential for managed cloud MySQL like Aiven)
+    # Try connecting directly to the database first (essential for managed cloud MySQL)
     db_conn = get_db_connection()
-    if not db_conn and host in ("localhost", "127.0.0.1"):
+    if not db_conn:
         server_conn = get_server_connection()
         if server_conn:
             try:
@@ -127,6 +156,10 @@ def init_db():
                 db_conn = get_db_connection()
             except Error as e:
                 print(f"[ERROR] Failed to create database `{db_name}`: {e}")
+                try:
+                    server_conn.close()
+                except Exception:
+                    pass
                 return False
 
     if not db_conn:
@@ -332,6 +365,7 @@ def init_db():
         db_conn.commit()
         cursor.close()
         db_conn.close()
+        _db_initialized = True
         return True
 
     except Error as e:

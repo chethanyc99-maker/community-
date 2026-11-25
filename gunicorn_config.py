@@ -3,7 +3,7 @@ import os
 import multiprocessing
 
 bind = f"0.0.0.0:{os.environ.get('PORT', '5000')}"
-workers = int(os.environ.get("WEB_CONCURRENCY", 2))
+workers = int(os.environ.get("WEB_CONCURRENCY", 1))
 threads = int(os.environ.get("PYTHON_MAX_THREADS", 4))
 worker_class = "gthread"
 worker_connections = 1000

@@ -124,10 +124,10 @@ class AppController {
         isDark = Boolean(storedSettings.highContrast || storedSettings.darkMode);
       }
     } catch (_) {}
-    this.setThemeMode(isDark, false);
+    this.setThemeMode(isDark, false, false);
   }
 
-  setThemeMode(isDark, notify = false) {
+  setThemeMode(isDark, notify = false, persist = true) {
     const shouldBeDark = Boolean(isDark);
     document.body.classList.toggle('theme-dark', shouldBeDark);
     document.body.classList.toggle('theme-high-contrast', shouldBeDark);
@@ -152,7 +152,9 @@ class AppController {
       localStorage.setItem('prerana_theme', shouldBeDark ? 'dark' : 'light');
     } catch (_) {}
 
-    window.iepStorage?.saveSettingsRemote({ highContrast: shouldBeDark, darkMode: shouldBeDark });
+    if (persist) {
+      window.iepStorage?.saveSettingsRemote({ highContrast: shouldBeDark, darkMode: shouldBeDark });
+    }
 
     if (notify) {
       window.soundFx?.playPop();
@@ -1622,17 +1624,28 @@ class AppController {
     const qrImage = document.getElementById('qr-image');
 
     const refreshNetworkInfo = async () => {
-      let targetUrl = window.location.href;
+      const host = window.location.hostname || '';
+      const isPrivateOrLocal =
+        !host ||
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.') ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(host);
 
-      try {
-        const res = await fetch('/api/network-info');
-        if (res.ok) {
-          const data = await res.json();
-          targetUrl = data.network_url;
-        }
-      } catch (err) {
-        if (window.location.protocol.startsWith('http')) {
-          targetUrl = window.location.origin;
+      let targetUrl = window.location.origin && window.location.origin !== 'null'
+        ? window.location.origin
+        : window.location.href;
+
+      if (isPrivateOrLocal) {
+        try {
+          const res = await fetch('/api/network-info');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.network_url) targetUrl = data.network_url;
+          }
+        } catch (err) {
+          // Retain current origin fallback
         }
       }
 
@@ -2039,7 +2052,7 @@ class AppController {
     } catch (_) {
       isDarkTheme = Boolean(settings.highContrast || settings.darkMode);
     }
-    this.setThemeMode(isDarkTheme, false);
+    this.setThemeMode(isDarkTheme, false, false);
 
     document.body.classList.toggle('font-dyslexic', Boolean(settings.dyslexicFont));
     document.body.classList.toggle('font-standard', !settings.dyslexicFont);

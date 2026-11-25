@@ -1,43 +1,28 @@
 services:
   # Prerana Web Application Service
+  # Hosted over HTTPS (port 443) for 24/7 access from any device, Wi-Fi/WPS, LAN, VPN, or mobile network
   - type: web
     name: prerana-assistive-platform
-    env: python
+    runtime: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn app:app --config gunicorn_config.py
+    healthCheckPath: /api/health
     autoDeploy: true
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.11"
       - key: FLASK_ENV
         value: production
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: PYTHON_MAX_THREADS
+        value: "4"
       - key: SECRET_KEY
         generateValue: true
-      - key: MYSQL_HOST
-        fromDatabase:
-          name: prerana-db
-          property: host
-      - key: MYSQL_USER
-        fromDatabase:
-          name: prerana-db
-          property: user
-      - key: MYSQL_PASSWORD
-        fromDatabase:
-          name: prerana-db
-          property: password
-      - key: MYSQL_DB
-        fromDatabase:
-          name: prerana-db
-          property: database
-      - key: MYSQL_PORT
-        fromDatabase:
-          name: prerana-db
-          property: port
-
-databases:
-  # Managed Cloud MySQL Service
-  - name: prerana-db
-    databaseName: computer_based_learning
-    user: prerana_admin
-    plan: free
-    region: oregon
+      # Render Blueprints only provision PostgreSQL, so connect an external Managed Cloud MySQL URI
+      # (e.g., Aiven Free MySQL, TiDB Cloud Serverless, or Railway MySQL):
+      # Example: mysql://user:password@host:port/computer_based_learning
+      - key: MYSQL_URL
+        sync: false
