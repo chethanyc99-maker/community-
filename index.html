@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Prerana">
 
-  <link rel="stylesheet" href="styles/main.css?v=20">
+  <link rel="stylesheet" href="styles/main.css?v=21">
   <link rel="stylesheet" href="styles/playground.css?v=2">
   <style>
     .hidden,
@@ -32,7 +32,13 @@
        Top Navigation Bar
        (Hidden while on the Login / Create Account screen; revealed after sign-in)
        ===================================================================== -->
-  <header class="top-nav glass-navbar glass-panel hidden" id="app-top-header" role="banner">
+  <header class="top-nav liquid-glass-header hidden" id="app-top-header" role="banner"
+          data-lg-variant="floating" data-lg-radius="24" data-lg-bevel-depth="12"
+          data-lg-scale="36" data-lg-aberration="4" data-lg-frost="0.4" data-lg-tint="0.25">
+    <!-- LiquidGlass Optical Surface Layers (refract background behind header only) -->
+    <div class="liquid-glass-backdrop" aria-hidden="true"></div>
+    <div class="liquid-glass-tint" aria-hidden="true"></div>
+    <div class="liquid-glass-rim" aria-hidden="true"></div>
     <!-- Left Header Group: Clean 3-Line Hamburger Menu Toggle + Brand Logo -->
     <div class="header-left-group">
       <!-- Clean 3-line Hamburger Menu Toggle Button -->
@@ -1279,6 +1285,7 @@
   <script src="scripts/modules/catalog-activities.js?v=11"></script>
   <script src="scripts/modules/special-activities.js?v=11"></script>
   <script src="scripts/modules/playground.js?v=2"></script>
+  <script src="scripts/liquid-glass-header.js?v=1"></script>
   <script src="scripts/app.js?v=17"></script>
 </body>
 </html>
