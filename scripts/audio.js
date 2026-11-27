@@ -223,6 +223,116 @@ class SoundEffects {
     });
   }
 
+  // Deep gentle drum beat (Boom-Boom)
+  playDrum() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    [0, 0.28, 0.56].forEach(delay => {
+      const t = this.ctx.currentTime + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(52, t + 0.22);
+      gain.gain.setValueAtTime(0.32, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    });
+  }
+
+  // Friendly two-chord Train Whistle (Choo-Choo)
+  playTrainWhistle() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    [0, 0.42].forEach(delay => {
+      [392.0, 493.88, 587.33].forEach(freq => {
+        const t = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.09, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.35);
+      });
+    });
+  }
+
+  // Soft Telephone Ring-Ring
+  playPhoneRing() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    [0, 0.14, 0.28, 0.6, 0.74, 0.88].forEach((delay, idx) => {
+      const t = this.ctx.currentTime + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(idx % 2 === 0 ? 1050 : 1320, t);
+      gain.gain.setValueAtTime(0.14, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    });
+  }
+
+  // Water / Raindrop plinks
+  playRaindrop() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    [660, 880, 740, 990].forEach((base, idx) => {
+      const t = this.ctx.currentTime + idx * 0.16;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(base, t);
+      osc.frequency.exponentialRampToValueAtTime(base * 1.45, t + 0.08);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.13);
+    });
+  }
+
+  // Pond Frog ribbit
+  playFrog() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    [0, 0.34].forEach(delay => {
+      const t = this.ctx.currentTime + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(190, t);
+      osc.frequency.linearRampToValueAtTime(340, t + 0.15);
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.23);
+    });
+  }
+
   /**
    * Play a musical tone for Music & Rhymes Xylophone/Piano
    * @param {number} freq Frequency in Hz (e.g., 261.63 for Middle C)

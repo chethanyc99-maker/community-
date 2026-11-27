@@ -41,7 +41,41 @@ class DailyLivingModule {
         steps: [
           { order: 1, title: "Wear Clean Clothes", visual: "👕", prompt: "First, put on your clean clothes or uniform." },
           { order: 2, title: "Put on Shoes", visual: "👟", prompt: "Next, wear your socks and shoes." },
-          { order: 3, title: "Pack School Bag", visual: "🎒", prompt: "Now pack your books, water bottle, and bag." }
+          { order: 3, title: "Eat Breakfast", visual: "🥣", prompt: "Eat a healthy breakfast for energy!" },
+          { order: 4, title: "Pack School Bag", visual: "🎒", prompt: "Now pack your books, water bottle, and bag." }
+        ]
+      },
+      {
+        id: "mealtime",
+        title: "Healthy Mealtime Routine 🍽️",
+        instruction: "Follow good habits during mealtime!",
+        steps: [
+          { order: 1, title: "Wash Hands First", visual: "🧼", prompt: "First, wash your hands cleanly before touching food." },
+          { order: 2, title: "Sit at the Table", visual: "🪑", prompt: "Sit comfortably and calmly at the dining table." },
+          { order: 3, title: "Eat Healthy Food", visual: "🥗", prompt: "Chew slowly and enjoy your nutritious meal." },
+          { order: 4, title: "Drink Water & Wipe", visual: "🥤", prompt: "Drink clean water and wipe your mouth cleanly." }
+        ]
+      },
+      {
+        id: "bedtime",
+        title: "Peaceful Bedtime Routine 🌙",
+        instruction: "Let's wind down nicely for restful sleep!",
+        steps: [
+          { order: 1, title: "Put Toys Away", visual: "🧸", prompt: "First, put toys neatly back in their basket." },
+          { order: 2, title: "Wear Soft Pajamas", visual: "👘", prompt: "Change into clean, cozy night pajamas." },
+          { order: 3, title: "Brush Teeth", visual: "🪥", prompt: "Brush your teeth cleanly before sleep." },
+          { order: 4, title: "Read Story & Sleep", visual: "📖", prompt: "Listen to a calm bedtime story and rest well." }
+        ]
+      },
+      {
+        id: "studydesk",
+        title: "Tidy Study Desk Routine 📚",
+        instruction: "Let's organize our study desk cleanly!",
+        steps: [
+          { order: 1, title: "Close Notebook", visual: "📓", prompt: "Close your reading book and notebook gently." },
+          { order: 2, title: "Store Pencils", visual: "✏️", prompt: "Put pencils and crayons back in your pencil box." },
+          { order: 3, title: "Stack Books Neatly", visual: "📚", prompt: "Place your books in one neat stack on the corner." },
+          { order: 4, title: "Push Chair In", visual: "🪑", prompt: "Finally, push your chair neatly under the desk." }
         ]
       }
     ];

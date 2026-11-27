@@ -61,6 +61,71 @@ class SoundsModule {
           { id: "bird", visual: "🐦", label: "Singing Bird" },
           { id: "turtle", visual: "🐢", label: "Slow Turtle" }
         ]
+      },
+      {
+        id: "drum",
+        prompt: "Boom boom boom! Which musical instrument makes this deep beat? 🥁",
+        speech: "Listen to the steady beat! Which instrument makes this drum sound?",
+        soundType: "drum",
+        targetId: "drum",
+        items: [
+          { id: "drum", visual: "🥁", label: "Marching Drum" },
+          { id: "book", visual: "📖", label: "Storybook" },
+          { id: "apple", visual: "🍎", label: "Red Apple" },
+          { id: "teddy", visual: "🧸", label: "Soft Teddy" }
+        ]
+      },
+      {
+        id: "train",
+        prompt: "Choo-choo! What rides on rails and blows this whistle? 🚂",
+        speech: "Listen to that whistle! What vehicle rolls on train tracks?",
+        soundType: "train",
+        targetId: "train",
+        items: [
+          { id: "train", visual: "🚂", label: "Steam Train" },
+          { id: "chair", visual: "🪑", label: "Wooden Chair" },
+          { id: "flower", visual: "🌸", label: "Flower" },
+          { id: "spoon", visual: "🥄", label: "Soup Spoon" }
+        ]
+      },
+      {
+        id: "phone",
+        prompt: "Ring-ring! What do we pick up to say Hello to family? 📞",
+        speech: "Hear that polite ring? Which object helps us call family?",
+        soundType: "phone",
+        targetId: "phone",
+        items: [
+          { id: "banana", visual: "🍌", label: "Banana" },
+          { id: "phone", visual: "📞", label: "Telephone" },
+          { id: "hat", visual: "👒", label: "Sun Hat" },
+          { id: "soccer", visual: "⚽", label: "Soccer Ball" }
+        ]
+      },
+      {
+        id: "raindrop",
+        prompt: "Plink plink splash! What falls softly from clouds to water plants? 🌧️",
+        speech: "Listen to the gentle splash sound! What waters flowers outside?",
+        soundType: "raindrop",
+        targetId: "raindrop",
+        items: [
+          { id: "raindrop", visual: "🌧️", label: "Raindrops" },
+          { id: "lamp", visual: "💡", label: "Light Bulb" },
+          { id: "scissors", visual: "✂️", label: "Scissors" },
+          { id: "backpack", visual: "🎒", label: "School Bag" }
+        ]
+      },
+      {
+        id: "frog",
+        prompt: "Ribbit ribbit! Who jumps on lily pads near the pond? 🐸",
+        speech: "Hear the pond croak? Which green hopper says ribbit?",
+        soundType: "frog",
+        targetId: "frog",
+        items: [
+          { id: "frog", visual: "🐸", label: "Pond Frog" },
+          { id: "pencil", visual: "✏️", label: "Pencil" },
+          { id: "bus", visual: "🚌", label: "School Bus" },
+          { id: "cake", visual: "🍰", label: "Slice of Cake" }
+        ]
       }
     ];
   }
@@ -147,6 +212,21 @@ class SoundsModule {
         break;
       case 'bird':
         window.soundFx.playBird();
+        break;
+      case 'drum':
+        window.soundFx.playDrum();
+        break;
+      case 'train':
+        window.soundFx.playTrainWhistle();
+        break;
+      case 'phone':
+        window.soundFx.playPhoneRing();
+        break;
+      case 'raindrop':
+        window.soundFx.playRaindrop();
+        break;
+      case 'frog':
+        window.soundFx.playFrog();
         break;
       default:
         window.soundFx.playSuccess();

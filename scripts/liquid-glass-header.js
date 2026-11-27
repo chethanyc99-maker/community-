@@ -1,30 +1,50 @@
 /**
- * Prerana LiquidGlassHeader Controller (Vanilla HTML/CSS/JS implementation)
- * Implements the LiquidGlassHeader optical design specification:
- * - variant: "floating" | "full" (default: "floating")
- * - radius: number (default: 24 for floating, 0 for full)
- * - bevelDepth: number (default: 12)
- * - scale: number (default: 36)
- * - aberration: number (default: 4)
- * - frost: number (default: 0.4)
- * - tint: number (default: 0.25)
+ * Prerana LiquidGlass UI Engine (Vanilla HTML/CSS/JS)
+ * Implements:
+ * 1. LiquidGlassSurface (reusable SVG bevel displacement + chromatic aberration + frost + tint)
+ * 2. LiquidGlassHeader (variant="floating" | "full", radius=24, bevelDepth=12, scale=36, aberration=4, frost=0.4, tint=0.25)
+ * 3. LiquidGlassToggleBar (radius=999, bevelDepth=10, scale=28, aberration=2, tint=0.45 + spring sliding active indicator)
  */
 (function (global) {
   'use strict';
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
+  let surfaceCounter = 0;
 
-  class LiquidGlassHeader {
+  function ensureSvgRoot() {
+    let svg = document.getElementById('liquid-glass-header-svg');
+    if (!svg) {
+      svg = document.createElementNS(SVG_NS, 'svg');
+      svg.id = 'liquid-glass-header-svg';
+      svg.setAttribute('aria-hidden', 'true');
+      svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
+      const defs = document.createElementNS(SVG_NS, 'defs');
+      svg.appendChild(defs);
+      document.body.appendChild(svg);
+    }
+    return svg;
+  }
+
+  function supportsSvgBackdropFilter() {
+    if (typeof window === 'undefined' || !window.CSS || typeof CSS.supports !== 'function') {
+      return false;
+    }
+    const ua = navigator.userAgent || '';
+    const isChromium = (Boolean(window.chrome) || /\b(Chrome|Chromium|Edg|OPR|Brave)\b/i.test(ua))
+      && !/\b(Firefox|FxiOS)\b/i.test(ua);
+    return isChromium && CSS.supports('backdrop-filter', 'blur(1px)');
+  }
+
+  class LiquidGlassSurface {
     constructor(element, options = {}) {
       if (!element) return;
       this.el = element;
+      this.instanceId = ++surfaceCounter;
 
       const ds = element.dataset || {};
       this.variant = options.variant || ds.lgVariant || 'floating';
-      const isFloating = this.variant === 'floating';
-
       const parsedRadius = ds.lgRadius !== undefined ? Number(ds.lgRadius) : options.radius;
-      this.radius = Number.isFinite(parsedRadius) ? parsedRadius : (isFloating ? 24 : 0);
+      this.radius = Number.isFinite(parsedRadius) ? parsedRadius : (this.variant === 'floating' ? 24 : 0);
       this.bevelDepth = Number.isFinite(Number(options.bevelDepth ?? ds.lgBevelDepth ?? 12))
         ? Number(options.bevelDepth ?? ds.lgBevelDepth ?? 12) : 12;
       this.scale = Number.isFinite(Number(options.scale ?? ds.lgScale ?? 36))
@@ -36,25 +56,47 @@
       this.tint = Number.isFinite(Number(options.tint ?? ds.lgTint ?? 0.25))
         ? Number(options.tint ?? ds.lgTint ?? 0.25) : 0.25;
 
-      this.svgEl = null;
+      this.filterId = options.filterId || `liquid-glass-filter-${this.instanceId}`;
       this.feImageEl = null;
       this.lastWidth = 0;
       this.lastHeight = 0;
       this.rafId = null;
       this.resizeObserver = null;
+      this.onResizeCallback = typeof options.onResize === 'function' ? options.onResize : null;
 
       this.init();
     }
 
     init() {
+      this.ensureSurfaceLayers();
       this.applyPropsToCSS();
       this.setupSvgFilter();
       this.bindResizeObserver();
       this.scheduleMapUpdate();
     }
 
-    applyPropsToCSS() {
-      const effectiveRadius = this.variant === 'floating' ? this.radius : 0;
+    ensureSurfaceLayers() {
+      const insertOrder = ['liquid-glass-backdrop', 'liquid-glass-tint', 'liquid-glass-rim'];
+      const existingFirst = this.el.firstElementChild;
+      let anchor = existingFirst;
+      insertOrder.forEach((cls) => {
+        if (!this.el.querySelector(`:scope > .${cls}`)) {
+          const layer = document.createElement('div');
+          layer.className = cls;
+          layer.setAttribute('aria-hidden', 'true');
+          this.el.insertBefore(layer, anchor || null);
+        } else {
+          anchor = this.el.querySelector(`:scope > .${cls}`).nextElementSibling;
+        }
+      });
+    }
+
+    applyPropsToCSS(effectiveHeight = 0) {
+      let effectiveRadius = this.variant === 'floating' ? this.radius : 0;
+      // Softly adapt multi-row/vertical capsule toggle bars so corners never pinch vertically
+      if (effectiveRadius >= 900 && effectiveHeight > 68) {
+        effectiveRadius = 24;
+      }
       this.el.setAttribute('data-lg-variant', this.variant);
       this.el.style.setProperty('--lg-radius', `${effectiveRadius}px`);
       this.el.style.setProperty('--lg-bevel-depth', `${this.bevelDepth}px`);
@@ -64,29 +106,16 @@
       this.el.style.setProperty('--lg-aberration', `${this.aberration}px`);
     }
 
-    supportsSvgBackdropFilter() {
-      if (typeof window === 'undefined' || !window.CSS || typeof CSS.supports !== 'function') {
-        return false;
-      }
-      const ua = navigator.userAgent || '';
-      const isChromium = (Boolean(window.chrome) || /\b(Chrome|Chromium|Edg|OPR|Brave)\b/i.test(ua))
-        && !/\b(Firefox|FxiOS)\b/i.test(ua);
-      return isChromium && CSS.supports('backdrop-filter', 'blur(1px)');
-    }
-
     setupSvgFilter() {
-      if (!this.supportsSvgBackdropFilter()) return;
+      if (!supportsSvgBackdropFilter()) return;
 
-      let svg = document.getElementById('liquid-glass-header-svg');
-      if (!svg) {
-        svg = document.createElementNS(SVG_NS, 'svg');
-        svg.id = 'liquid-glass-header-svg';
-        svg.setAttribute('aria-hidden', 'true');
-        svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
+      const svg = ensureSvgRoot();
+      const defs = svg.querySelector('defs') || svg;
+      let filter = document.getElementById(this.filterId);
 
-        const defs = document.createElementNS(SVG_NS, 'defs');
-        const filter = document.createElementNS(SVG_NS, 'filter');
-        filter.id = 'liquid-glass-header-filter';
+      if (!filter) {
+        filter = document.createElementNS(SVG_NS, 'filter');
+        filter.id = this.filterId;
         filter.setAttribute('x', '0%');
         filter.setAttribute('y', '0%');
         filter.setAttribute('width', '100%');
@@ -94,7 +123,7 @@
         filter.setAttribute('color-interpolation-filters', 'sRGB');
 
         const feImage = document.createElementNS(SVG_NS, 'feImage');
-        feImage.id = 'lg-header-fe-image';
+        feImage.id = `${this.filterId}-img`;
         feImage.setAttribute('x', '0');
         feImage.setAttribute('y', '0');
         feImage.setAttribute('width', '100%');
@@ -146,22 +175,19 @@
         filter.appendChild(blendRGB);
 
         defs.appendChild(filter);
-        svg.appendChild(defs);
-        document.body.appendChild(svg);
       }
 
-      this.svgEl = svg;
-      this.feImageEl = document.getElementById('lg-header-fe-image');
+      this.feImageEl = document.getElementById(`${this.filterId}-img`);
+      this.el.style.setProperty('--lg-filter-url', `url(#${this.filterId})`);
     }
 
     bindResizeObserver() {
       if (typeof ResizeObserver === 'function') {
-        this.resizeObserver = new ResizeObserver(() => {
-          this.scheduleMapUpdate();
-        });
+        this.resizeObserver = new ResizeObserver(() => this.scheduleMapUpdate());
         this.resizeObserver.observe(this.el);
       }
-      window.addEventListener('resize', () => this.scheduleMapUpdate(), { passive: true });
+      this._onWinResize = () => this.scheduleMapUpdate();
+      window.addEventListener('resize', this._onWinResize, { passive: true });
     }
 
     scheduleMapUpdate() {
@@ -173,11 +199,17 @@
     }
 
     updateDisplacementMap() {
-      if (!this.feImageEl) return;
       const rect = this.el.getBoundingClientRect();
       const width = Math.round(rect.width);
       const height = Math.round(rect.height);
       if (width <= 0 || height <= 0) return;
+
+      this.applyPropsToCSS(height);
+      if (this.onResizeCallback) {
+        this.onResizeCallback();
+      }
+
+      if (!this.feImageEl) return;
       if (Math.abs(width - this.lastWidth) <= 1 && Math.abs(height - this.lastHeight) <= 1) return;
 
       this.lastWidth = width;
@@ -192,7 +224,9 @@
       const imgData = ctx.createImageData(width, height);
       const data = imgData.data;
 
-      const effectiveRadius = this.variant === 'floating' ? this.radius : 0;
+      let effectiveRadius = this.variant === 'floating' ? this.radius : 0;
+      if (effectiveRadius >= 900 && height > 68) effectiveRadius = 24;
+
       const r = Math.min(effectiveRadius, width / 2, height / 2);
       const bevel = Math.max(1, Math.min(this.bevelDepth, height / 2));
       const halfW = width / 2;
@@ -258,6 +292,9 @@
         this.resizeObserver.disconnect();
         this.resizeObserver = null;
       }
+      if (this._onWinResize) {
+        window.removeEventListener('resize', this._onWinResize);
+      }
       if (this.rafId) {
         window.cancelAnimationFrame(this.rafId);
         this.rafId = null;
@@ -265,9 +302,146 @@
     }
   }
 
-  global.LiquidGlassHeader = LiquidGlassHeader;
+  class LiquidGlassHeader extends LiquidGlassSurface {
+    constructor(element, options = {}) {
+      super(element, {
+        variant: 'floating',
+        radius: 24,
+        bevelDepth: 12,
+        scale: 36,
+        aberration: 4,
+        frost: 0.4,
+        tint: 0.25,
+        filterId: 'liquid-glass-header-filter',
+        ...options
+      });
+    }
+  }
 
-  function bootLiquidGlassHeader() {
+  class LiquidGlassToggleBar {
+    constructor(element, options = {}) {
+      if (!element) return;
+      this.el = element;
+      this.indicator = null;
+      this.mutationObserver = null;
+      this.syncRaf = null;
+
+      this.el.classList.add('lg-toggle-bar');
+      this.surface = new LiquidGlassSurface(element, {
+        variant: 'floating',
+        radius: 999,
+        bevelDepth: 10,
+        scale: 28,
+        aberration: 2,
+        frost: 0.4,
+        tint: 0.45,
+        onResize: () => this.syncIndicator(false),
+        ...options
+      });
+
+      this.ensureIndicator();
+      this.bindEvents();
+      this.syncIndicator(false);
+    }
+
+    ensureIndicator() {
+      let ind = this.el.querySelector(':scope > .lg-toggle-indicator');
+      if (!ind) {
+        ind = document.createElement('span');
+        ind.className = 'lg-toggle-indicator';
+        ind.setAttribute('aria-hidden', 'true');
+        this.el.appendChild(ind);
+      }
+      this.indicator = ind;
+    }
+
+    getActiveOption() {
+      const active = this.el.querySelector(':scope > button.active, :scope > [role="tab"].active, :scope > [role="radio"].active');
+      if (active || this.el.dataset.lgOptionalActive === 'true') {
+        return active;
+      }
+      return this.el.querySelector(':scope > button, :scope > [role="tab"], :scope > [role="radio"]');
+    }
+
+    bindEvents() {
+      this._onClick = (e) => {
+        const btn = e.target.closest('button, [role="tab"], [role="radio"]');
+        if (btn && this.el.contains(btn)) {
+          this.scheduleSync(true);
+        }
+      };
+      this.el.addEventListener('click', this._onClick, { passive: true });
+
+      if (typeof MutationObserver === 'function') {
+        this.mutationObserver = new MutationObserver(() => this.scheduleSync(true));
+        this.mutationObserver.observe(this.el, {
+          attributes: true,
+          attributeFilter: ['class', 'aria-selected', 'aria-checked'],
+          subtree: true
+        });
+      }
+    }
+
+    scheduleSync(animate = true) {
+      if (this.syncRaf) window.cancelAnimationFrame(this.syncRaf);
+      this.syncRaf = window.requestAnimationFrame(() => {
+        this.syncRaf = null;
+        this.syncIndicator(animate);
+      });
+    }
+
+    syncIndicator(animate = true) {
+      if (!this.indicator) return;
+      const activeBtn = this.getActiveOption();
+      if (!activeBtn) {
+        this.indicator.style.opacity = '0';
+        return;
+      }
+
+      const w = activeBtn.offsetWidth;
+      const h = activeBtn.offsetHeight;
+      if (w <= 0 || h <= 0) {
+        this.indicator.style.opacity = '0';
+        return;
+      }
+
+      const x = activeBtn.offsetLeft;
+      const y = activeBtn.offsetTop;
+
+      const reduceMotion =
+        document.body.classList.contains('reduced-motion') ||
+        (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+      if (!animate || reduceMotion) {
+        this.indicator.style.transition = 'none';
+      } else {
+        this.indicator.style.transition = '';
+      }
+
+      this.indicator.style.opacity = '1';
+      this.indicator.style.width = `${w}px`;
+      this.indicator.style.height = `${h}px`;
+      this.indicator.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+      if (!animate || reduceMotion) {
+        void this.indicator.offsetWidth;
+        this.indicator.style.transition = '';
+      }
+    }
+
+    destroy() {
+      if (this.mutationObserver) this.mutationObserver.disconnect();
+      if (this._onClick) this.el.removeEventListener('click', this._onClick);
+      if (this.syncRaf) window.cancelAnimationFrame(this.syncRaf);
+      this.surface?.destroy();
+    }
+  }
+
+  function refreshAllToggleBars() {
+    (global.__preranaLiquidGlassToggleBars || []).forEach((bar) => bar.scheduleSync(false));
+  }
+
+  function bootLiquidGlassUI() {
     const headerEl = document.getElementById('app-top-header');
     if (headerEl && !global.__preranaLiquidGlassHeader) {
       global.__preranaLiquidGlassHeader = new LiquidGlassHeader(headerEl, {
@@ -280,11 +454,46 @@
         tint: 0.25
       });
     }
+
+    const barSelectors = [
+      '#category-filter-row',
+      '.home-difficulty-bar',
+      '.auth-segmented-nav',
+      '.reg-role-options',
+      '.sidebar-nav-list',
+      '#mobile-bottom-nav'
+    ];
+    if (!global.__preranaLiquidGlassToggleBars) {
+      global.__preranaLiquidGlassToggleBars = [];
+    }
+
+    barSelectors.forEach((sel) => {
+      document.querySelectorAll(sel).forEach((el) => {
+        if (!el.__lgToggleBarInstance) {
+          const isVerticalSidebar = el.classList.contains('sidebar-nav-list');
+          const inst = new LiquidGlassToggleBar(el, {
+            radius: isVerticalSidebar ? 20 : 999,
+            bevelDepth: 10,
+            scale: 28,
+            aberration: 2,
+            frost: 0.4,
+            tint: 0.45
+          });
+          el.__lgToggleBarInstance = inst;
+          global.__preranaLiquidGlassToggleBars.push(inst);
+        }
+      });
+    });
   }
 
+  global.LiquidGlassSurface = LiquidGlassSurface;
+  global.LiquidGlassHeader = LiquidGlassHeader;
+  global.LiquidGlassToggleBar = LiquidGlassToggleBar;
+  global.refreshLiquidGlassToggleBars = refreshAllToggleBars;
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootLiquidGlassHeader);
+    document.addEventListener('DOMContentLoaded', bootLiquidGlassUI);
   } else {
-    bootLiquidGlassHeader();
+    bootLiquidGlassUI();
   }
 })(window);

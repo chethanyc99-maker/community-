@@ -3,29 +3,29 @@
  * Provides offline-first resilience across mobile networks (4G/5G), Wi-Fi, LAN, and Ethernet.
  */
 
-const CACHE_NAME = 'prerana-cache-v32';
+const CACHE_NAME = 'prerana-cache-v38';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './styles/main.css?v=21',
+  './styles/main.css?v=25',
   './styles/playground.css?v=2',
   './scripts/assistive-access.js?v=1',
   './scripts/i18n.js?v=1',
-  './scripts/audio.js?v=9',
+  './scripts/audio.js?v=10',
   './scripts/tts.js?v=9',
   './scripts/storage.js?v=9',
-  './scripts/liquid-glass-header.js?v=1',
-  './scripts/app.js?v=17',
-  './scripts/modules/shapes.js?v=11',
-  './scripts/modules/daily-skills.js?v=11',
-  './scripts/modules/emotions.js?v=11',
-  './scripts/modules/counting.js?v=11',
-  './scripts/modules/sounds.js?v=11',
+  './scripts/liquid-glass-header.js?v=3',
+  './scripts/app.js?v=20',
+  './scripts/modules/shapes.js?v=12',
+  './scripts/modules/daily-skills.js?v=12',
+  './scripts/modules/emotions.js?v=12',
+  './scripts/modules/counting.js?v=12',
+  './scripts/modules/sounds.js?v=12',
   './scripts/modules/calming.js?v=11',
-  './scripts/modules/catalog-activities.js?v=11',
-  './scripts/modules/special-activities.js?v=11',
+  './scripts/modules/catalog-activities.js?v=12',
+  './scripts/modules/special-activities.js?v=12',
   './scripts/modules/playground.js?v=2'
 ];
 

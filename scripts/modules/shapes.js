@@ -53,6 +53,94 @@ class ShapesModule {
           { id: "green-leaf", visual: "🍃", label: "Green Leaf" },
           { id: "yellow-banana", visual: "🍌", label: "Yellow Banana" }
         ]
+      },
+      {
+        question: "Tap the Red Triangle 🔺",
+        speech: "Find the triangle with three corners!",
+        targetId: "red-triangle",
+        items: [
+          { id: "red-triangle", visual: "🔺", label: "Red Triangle" },
+          { id: "yellow-circle", visual: "🟡", label: "Yellow Circle" },
+          { id: "blue-square", visual: "🟦", label: "Blue Square" },
+          { id: "purple-heart", visual: "💜", label: "Purple Heart" }
+        ]
+      },
+      {
+        question: "Which shape is a Purple Heart? 💜",
+        speech: "Tap the loving purple heart!",
+        targetId: "purple-heart",
+        items: [
+          { id: "green-square", visual: "🟩", label: "Green Square" },
+          { id: "purple-heart", visual: "💜", label: "Purple Heart" },
+          { id: "orange-diamond", visual: "🔶", label: "Orange Diamond" },
+          { id: "yellow-star", visual: "⭐", label: "Yellow Star" }
+        ]
+      },
+      {
+        question: "Find the Orange Diamond 🔶",
+        speech: "Look for the sparkling orange diamond shape!",
+        targetId: "orange-diamond",
+        items: [
+          { id: "orange-diamond", visual: "🔶", label: "Orange Diamond" },
+          { id: "blue-circle", visual: "🔵", label: "Blue Circle" },
+          { id: "red-triangle", visual: "🔺", label: "Red Triangle" },
+          { id: "pink-flower", visual: "🌸", label: "Pink Flower" }
+        ]
+      },
+      {
+        question: "Which shape looks like a Glowing Moon? 🌙",
+        speech: "Tap the curved crescent moon in the night sky!",
+        targetId: "crescent-moon",
+        items: [
+          { id: "brown-cube", visual: "📦", label: "Box Cube" },
+          { id: "crescent-moon", visual: "🌙", label: "Crescent Moon" },
+          { id: "green-circle", visual: "🟢", label: "Green Circle" },
+          { id: "red-square", visual: "🟥", label: "Red Square" }
+        ]
+      },
+      {
+        question: "Tap the Bright Green Circle 🟢",
+        speech: "Can you find the round green circle?",
+        targetId: "green-circle",
+        items: [
+          { id: "green-circle", visual: "🟢", label: "Green Circle" },
+          { id: "orange-circle", visual: "🟠", label: "Orange Circle" },
+          { id: "yellow-triangle", visual: "⚠️", label: "Yellow Triangle" },
+          { id: "purple-square", visual: "🟪", label: "Purple Square" }
+        ]
+      },
+      {
+        question: "Find the Colorful Rainbow Arch 🌈",
+        speech: "Touch the bright rainbow with all its pretty colors!",
+        targetId: "rainbow-arch",
+        items: [
+          { id: "rainbow-arch", visual: "🌈", label: "Rainbow" },
+          { id: "white-cloud", visual: "☁️", label: "White Cloud" },
+          { id: "blue-drop", visual: "💧", label: "Blue Droplet" },
+          { id: "brown-box", visual: "📦", label: "Square Box" }
+        ]
+      },
+      {
+        question: "Touch the Purple Square 🟪",
+        speech: "Look carefully for the purple square with four equal sides!",
+        targetId: "purple-square",
+        items: [
+          { id: "yellow-circle", visual: "🟡", label: "Yellow Circle" },
+          { id: "purple-square", visual: "🟪", label: "Purple Square" },
+          { id: "blue-diamond", visual: "🔷", label: "Blue Diamond" },
+          { id: "green-triangle", visual: "🌲", label: "Green Tree" }
+        ]
+      },
+      {
+        question: "Which flower is Pink? 🌸",
+        speech: "Find the soft pink flower blossom!",
+        targetId: "pink-flower",
+        items: [
+          { id: "sunflower", visual: "🌻", label: "Yellow Sunflower" },
+          { id: "pink-flower", visual: "🌸", label: "Pink Flower" },
+          { id: "blue-wave", visual: "🌊", label: "Blue Wave" },
+          { id: "red-apple", visual: "🍎", label: "Red Apple" }
+        ]
       }
     ];
 

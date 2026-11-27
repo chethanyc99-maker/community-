@@ -84,18 +84,20 @@
       this.startTime = Date.now();
 
       const diff = getDiff();
-      const emojis = ['🍎', '⭐', '🦋', '🎈', '🍓', '🐥'];
+      const emojis = ['🍎', '⭐', '🦋', '🎈', '🍓', '🐥', '🚀', '🌻', '🐳', '🍪'];
       const chosenEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
       let targetNum = 3;
       let promptHtml = '';
       let voiceText = '';
       let visualHtml = '';
+      let readoutText = 'Tap a picture to count aloud!';
+      const modeRoll = Math.random();
 
-      if (diff === 'advanced' && Math.random() > 0.45) {
-        // Gentle visual addition (sum up to 10)
-        const a = Math.floor(Math.random() * 4) + 2; // 2..5
-        const b = Math.floor(Math.random() * 4) + 1; // 1..4
+      if (diff === 'advanced' && modeRoll > 0.62) {
+        // Gentle visual addition (sum up to 12)
+        const a = Math.floor(Math.random() * 5) + 2; // 2..6
+        const b = Math.floor(Math.random() * 5) + 1; // 1..5
         targetNum = a + b;
         promptHtml = `Add them together! How many ${chosenEmoji} in all?`;
         voiceText = `Count and add together! ${a} plus ${b} equals how many?`;
@@ -111,9 +113,62 @@
             <span class="math-operator">= ?</span>
           </div>
         `;
+      } else if (diff === 'advanced' && modeRoll > 0.30) {
+        // Visual take-away subtraction
+        const total = Math.floor(Math.random() * 5) + 5; // 5..9
+        const takeAway = Math.floor(Math.random() * (total - 2)) + 1; // 1..total-2
+        targetNum = total - takeAway;
+        promptHtml = `Take away ${takeAway}! Count the bright ${chosenEmoji} left:`;
+        voiceText = `Start with ${total} and take away ${takeAway}. How many bright items are left?`;
+        readoutText = 'Tap only the bright remaining pictures to count!';
+        visualHtml = `
+          <div class="addition-visual-row">
+            <div class="counting-group">
+              ${Array.from({ length: targetNum }, (_, idx) => `<button type="button" class="tap-count-item" data-n="${idx + 1}">${chosenEmoji}</button>`).join('')}
+            </div>
+            <span class="math-operator">−</span>
+            <div class="counting-group" style="opacity:0.55;">
+              ${Array.from({ length: takeAway }, () => `<span style="font-size:2rem; filter:grayscale(0.5); text-decoration:line-through;">${chosenEmoji}</span>`).join('')}
+            </div>
+            <span class="math-operator">= ?</span>
+          </div>
+        `;
+      } else if (diff === 'medium' && modeRoll > 0.62) {
+        // Easy medium addition (sum 3..8)
+        const a = Math.floor(Math.random() * 3) + 2; // 2..4
+        const b = Math.floor(Math.random() * 3) + 1; // 1..3
+        targetNum = a + b;
+        promptHtml = `Put both groups together! How many ${chosenEmoji} total?`;
+        voiceText = `Let us add! ${a} plus ${b} equals how many?`;
+        visualHtml = `
+          <div class="addition-visual-row">
+            <div class="counting-group">
+              ${Array.from({ length: a }, (_, idx) => `<button type="button" class="tap-count-item" data-n="${idx + 1}">${chosenEmoji}</button>`).join('')}
+            </div>
+            <span class="math-operator">+</span>
+            <div class="counting-group">
+              ${Array.from({ length: b }, (_, idx) => `<button type="button" class="tap-count-item" data-n="${a + idx + 1}">${chosenEmoji}</button>`).join('')}
+            </div>
+            <span class="math-operator">= ?</span>
+          </div>
+        `;
+      } else if (diff === 'easy' && modeRoll > 0.72) {
+        // Missing next number pattern (e.g. 2, 3, ?)
+        const start = Math.floor(Math.random() * 5) + 1;
+        targetNum = start + 2;
+        promptHtml = `What number comes right next in line?`;
+        voiceText = `Count along! ${start}, ${start + 1}, what comes next?`;
+        readoutText = `${start} → ${start + 1} → ?`;
+        visualHtml = `
+          <div class="counting-items-tray">
+            <div class="counting-group" style="font-size:1.85rem; font-weight:800; padding:0.75rem 1.25rem; color:#1E293B;">
+              ${start} &nbsp;→&nbsp; ${start + 1} &nbsp;→&nbsp; <span style="color:#4F46E5;">❓</span>
+            </div>
+          </div>
+        `;
       } else {
         const min = diff === 'easy' ? 1 : (diff === 'medium' ? 3 : 8);
-        const max = diff === 'easy' ? 5 : (diff === 'medium' ? 9 : 14);
+        const max = diff === 'easy' ? 6 : (diff === 'medium' ? 10 : 16);
         do {
           targetNum = Math.floor(Math.random() * (max - min + 1)) + min;
         } while (targetNum === this.lastTarget && max > min);
@@ -145,7 +200,7 @@
           <div class="task-prompt-box glass-panel glass-card">
             <h2 class="task-prompt-text">${promptHtml}</h2>
             ${visualHtml}
-            <div class="count-readout-pill glass-pill" id="live-count-pill">Tap a picture to count aloud!</div>
+            <div class="count-readout-pill glass-pill" id="live-count-pill">${readoutText}</div>
             <button type="button" id="btn-replay-numbers" class="btn-listen-prompt liquid-btn liquid-btn-primary liquid-btn-sm">🔊 Listen Again</button>
           </div>
 
@@ -156,6 +211,17 @@
                 <div class="choice-label">Number ${n}</div>
               </button>
             `).join('')}
+          </div>
+
+          <div class="explorer-strip glass-panel">
+            <div class="explorer-strip-header">Tap any number (1–20) to count aloud &amp; hear its tone!</div>
+            <div class="explorer-chips">
+              ${Array.from({ length: 20 }, (_, i) => i + 1).map(n => `
+                <button type="button" class="explorer-chip glass-pill num-strip-chip" data-n="${n}">
+                  <strong>${n}</strong>
+                </button>
+              `).join('')}
+            </div>
           </div>
         </div>
       `;
@@ -170,6 +236,16 @@
           if (window.speechAssistant) window.speechAssistant.speak(voiceText);
         });
       }
+
+      container.querySelectorAll('.num-strip-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          container.querySelectorAll('.num-strip-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const n = parseInt(chip.dataset.n, 10);
+          if (window.soundFx) window.soundFx.playCount(((n - 1) % 10) + 1);
+          if (window.speechAssistant) window.speechAssistant.speak(`Number ${n}`, true);
+        });
+      });
 
       let tapCounter = 0;
       const readout = container.querySelector('#live-count-pill');
@@ -253,7 +329,17 @@
         { id: 'sun', emoji: '☀️', name: 'Sun' },
         { id: 'rocket', emoji: '🚀', name: 'Rocket' },
         { id: 'flower', emoji: '🌸', name: 'Flower' },
-        { id: 'butterfly', emoji: '🦋', name: 'Butterfly' }
+        { id: 'butterfly', emoji: '🦋', name: 'Butterfly' },
+        { id: 'puppy', emoji: '🐶', name: 'Puppy' },
+        { id: 'strawberry', emoji: '🍓', name: 'Strawberry' },
+        { id: 'whale', emoji: '🐳', name: 'Whale' },
+        { id: 'balloon', emoji: '🎈', name: 'Balloon' },
+        { id: 'unicorn', emoji: '🦄', name: 'Unicorn' },
+        { id: 'sunflower', emoji: '🌻', name: 'Sunflower' },
+        { id: 'turtle', emoji: '🐢', name: 'Turtle' },
+        { id: 'drum', emoji: '🥁', name: 'Drum' },
+        { id: 'rainbow', emoji: '🌈', name: 'Rainbow' },
+        { id: 'pizza', emoji: '🍕', name: 'Pizza' }
       ];
 
       const picked = bank.sort(() => 0.5 - Math.random()).slice(0, pairCount);
@@ -389,6 +475,12 @@
         { id: 'break', emoji: '🛋️', label: 'Take a Break', phrase: 'I need a quiet break please', quizPrompt: 'The room feels too loud. Which card asks for a quiet break?' },
         { id: 'happy', emoji: '😊', label: 'Happy', phrase: 'I feel happy today', quizPrompt: 'You are having fun and smiling! Which card expresses Happy?' },
         { id: 'yes', emoji: '✅', label: 'Yes', phrase: 'Yes please', quizPrompt: 'Your teacher asks if you want a sticker. Which card means Yes?' },
+        { id: 'done', emoji: '✋', label: 'All Done', phrase: 'I am all done now', quizPrompt: 'You finished your snack or task. Which card says All Done?' },
+        { id: 'more', emoji: '➕', label: 'More Please', phrase: 'May I have some more please', quizPrompt: 'You enjoyed building blocks and want one more turn. Which card asks for More?' },
+        { id: 'play', emoji: '🎮', label: 'Play Together', phrase: 'Can we play together', quizPrompt: 'You want to invite your friend to join a game. Tap Play Together!' },
+        { id: 'loud', emoji: '🙉', label: 'Too Loud', phrase: 'It sounds too loud for my ears', quizPrompt: 'A noise outside feels overwhelming. Which card tells others it is Too Loud?' },
+        { id: 'pain', emoji: '🩹', label: 'Hurt / Care', phrase: 'Something hurts, please check', quizPrompt: 'If you fall and get a little scrape, which card asks an adult for care?' },
+        { id: 'hello', emoji: '👋', label: 'Hello Friend', phrase: 'Hello friend, nice to see you', quizPrompt: 'You arrive at school in the morning. Which card greets a friend?' },
         { id: 'thanks', emoji: '🙏', label: 'Thank You', phrase: 'Thank you very much', quizPrompt: 'Someone shared crayons with you. Tap how we say Thank You!' }
       ];
     }
@@ -646,6 +738,45 @@
             { freq: f.G, note: 'G', dur: 0.3 }, { freq: f.A, note: 'A', dur: 0.3 },
             { freq: f.B, note: 'B', dur: 0.3 }, { freq: f.C5, note: 'C5', dur: 0.6 }
           ]
+        },
+        {
+          id: 'rowboat',
+          title: '🚣 Row Row Your Boat',
+          lyric: 'Row, row, row your boat gently down the stream!',
+          notes: [
+            { freq: f.C, note: 'C', dur: 0.42 }, { freq: f.C, note: 'C', dur: 0.42 },
+            { freq: f.C, note: 'C', dur: 0.3 }, { freq: f.D, note: 'D', dur: 0.2 },
+            { freq: f.E, note: 'E', dur: 0.5 },
+            { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.D, note: 'D', dur: 0.2 },
+            { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.F, note: 'F', dur: 0.2 },
+            { freq: f.G, note: 'G', dur: 0.7 }
+          ]
+        },
+        {
+          id: 'macdonald',
+          title: '🚜 Old MacDonald Farm',
+          lyric: 'Old MacDonald had a farm, E-I-E-I-O!',
+          notes: [
+            { freq: f.G, note: 'G', dur: 0.32 }, { freq: f.G, note: 'G', dur: 0.32 },
+            { freq: f.G, note: 'G', dur: 0.32 }, { freq: f.D, note: 'D', dur: 0.32 },
+            { freq: f.E, note: 'E', dur: 0.32 }, { freq: f.E, note: 'E', dur: 0.32 },
+            { freq: f.D, note: 'D', dur: 0.6 },
+            { freq: f.B, note: 'B', dur: 0.32 }, { freq: f.B, note: 'B', dur: 0.32 },
+            { freq: f.A, note: 'A', dur: 0.32 }, { freq: f.A, note: 'A', dur: 0.32 },
+            { freq: f.G, note: 'G', dur: 0.7 }
+          ]
+        },
+        {
+          id: 'jingle',
+          title: '🔔 Cheerful Jingle Bells',
+          lyric: 'Jingle bells, jingle bells, jingle all the way!',
+          notes: [
+            { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.E, note: 'E', dur: 0.55 },
+            { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.E, note: 'E', dur: 0.55 },
+            { freq: f.E, note: 'E', dur: 0.3 }, { freq: f.G, note: 'G', dur: 0.3 },
+            { freq: f.C, note: 'C', dur: 0.38 }, { freq: f.D, note: 'D', dur: 0.25 },
+            { freq: f.E, note: 'E', dur: 0.75 }
+          ]
         }
       ];
     }
@@ -769,7 +900,11 @@
           { id: 'piano', visual: '🎹', label: 'Piano', prompt: 'Which colorful instrument has black and white keys we press?', voice: 'Which musical instrument has keys we press?', freq: 392.00 },
           { id: 'drum', visual: '🥁', label: 'Drum', prompt: 'Which instrument goes Boom-Boom when we tap it with sticks?', voice: 'Which instrument goes boom boom when we tap it?', freq: 130.81 },
           { id: 'bell', visual: '🔔', label: 'Bell', prompt: 'Which instrument rings Ding-Dong clearly?', voice: 'Which instrument rings ding dong?', freq: 783.99 },
-          { id: 'guitar', visual: '🎸', label: 'Guitar', prompt: 'Which musical instrument has strings we strum with our hand?', voice: 'Which musical instrument has strings we strum?', freq: 329.63 }
+          { id: 'guitar', visual: '🎸', label: 'Guitar', prompt: 'Which musical instrument has strings we strum with our hand?', voice: 'Which musical instrument has strings we strum?', freq: 329.63 },
+          { id: 'trumpet', visual: '🎺', label: 'Trumpet', prompt: 'Which shiny golden brass horn do musicians blow into?', voice: 'Which shiny brass horn do you blow to make music?', freq: 440.00 },
+          { id: 'violin', visual: '🎻', label: 'Violin', prompt: 'Which wooden string instrument rests on the shoulder with a bow?', voice: 'Which wooden string instrument is played with a smooth bow?', freq: 493.88 },
+          { id: 'saxophone', visual: '🎷', label: 'Saxophone', prompt: 'Which curved jazz horn plays warm smooth melodies?', voice: 'Which curved golden jazz instrument plays smooth tunes?', freq: 349.23 },
+          { id: 'banjo', visual: '🪕', label: 'Banjo', prompt: 'Which round-bodied folk string instrument strums happy beats?', voice: 'Which round folk instrument has plucked strings?', freq: 523.25 }
         ];
         const optCount = diff === 'easy' ? 2 : (diff === 'advanced' ? 4 : 3);
         const target = quizBank[Math.floor(Math.random() * quizBank.length)];
@@ -905,18 +1040,28 @@
         easy: [
           { id: 'morning', visual: '🌅', label: 'Morning', sub: 'Wake Up & Breakfast', prompt: 'When the bright morning sun rises, what time of day starts?', voice: 'When the sun rises and we wake up, is it Morning or Night?', praise: 'Yes! Morning starts with sunshine!' },
           { id: 'night', visual: '🌙', label: 'Night', sub: 'Moon & Bedtime', prompt: 'When stars shine and we sleep in bed, what time of day is it?', voice: 'When the moon and stars shine for bedtime, what time is it?', praise: 'Sweet dreams! That is Night time!' },
-          { id: 'afternoon', visual: '☀️', label: 'Afternoon', sub: 'Lunch & Playtime', prompt: 'After school lunch when the sun is high, it is...', voice: 'Around lunch time when the sun shines high, what time is it?', praise: 'Great! That is Afternoon!' }
+          { id: 'afternoon', visual: '☀️', label: 'Afternoon', sub: 'Lunch & Playtime', prompt: 'After school lunch when the sun is high, it is...', voice: 'Around lunch time when the sun shines high, what time is it?', praise: 'Great! That is Afternoon!' },
+          { id: 'evening', visual: '🌆', label: 'Evening', sub: 'Sunset & Family Time', prompt: 'When the sun sets orange in the sky before dinner, it is...', voice: 'When the sun paints the sky orange before dinner, what time is it?', praise: 'Cozy! That is Evening time!' }
         ],
         medium: [
           { id: 'tuesday', visual: '📅', label: 'Tuesday', sub: 'After Monday', prompt: 'On the calendar, which day comes right after Monday?', voice: 'Look at the week strip! Which day comes right after Monday?', praise: 'Awesome calendar work! Tuesday comes after Monday!' },
+          { id: 'wednesday', visual: '📅', label: 'Wednesday', sub: 'Middle of Week', prompt: 'Which school day comes right between Tuesday and Thursday?', voice: 'Which weekday sits right between Tuesday and Thursday?', praise: 'Spot on! Wednesday is right in the middle!' },
+          { id: 'thursday', visual: '📅', label: 'Thursday', sub: 'Before Friday', prompt: 'Which weekday comes right after Wednesday?', voice: 'Which weekday comes right after Wednesday?', praise: 'Super! Thursday!' },
+          { id: 'friday', visual: '🎉', label: 'Friday', sub: 'Before Saturday', prompt: 'Which school day comes right before Saturday?', voice: 'Which weekday comes right before Saturday?', praise: 'Great! Friday comes before the weekend!' },
           { id: 'sunday', visual: '🏡', label: 'Sunday', sub: 'Weekend Rest', prompt: 'Which weekend day comes after Saturday?', voice: 'Which weekend day comes right after Saturday?', praise: 'Hurray! Sunday is a relaxing weekend day!' },
           { id: 'rainy', visual: '🌧️', label: 'Rainy Season', sub: 'Umbrella Weather', prompt: 'When cool rain pours from gray clouds, which season or weather is it?', voice: 'When we carry umbrellas for rain drops, what weather is it?', praise: 'Splash! Rainy weather keeps trees green!' },
-          { id: 'friday', visual: '🎉', label: 'Friday', sub: 'Before Saturday', prompt: 'Which school day comes right before Saturday?', voice: 'Which weekday comes right before Saturday?', praise: 'Great! Friday comes before the weekend!' }
+          { id: 'summer', visual: '🏖️', label: 'Summer Season', sub: 'Warm & Sunny', prompt: 'Which warm sunny season gives sweet mangoes and long bright days?', voice: 'Which warm bright season lets us enjoy cool watermelon and mangoes?', praise: 'Sunny! Warm Summer season!' },
+          { id: 'winter', visual: '❄️', label: 'Winter Season', sub: 'Sweaters & Cozy Mornings', prompt: 'Which chilly season makes us wear warm sweaters and caps?', voice: 'When weather gets chilly and we wear cozy sweaters, which season is it?', praise: 'Cozy warm! Winter season!' }
         ],
         advanced: [
+          { id: 'clock_1', hour: 1, visual: '🕐', label: "1:00 (1 O'Clock)", sub: 'Quiet Afternoon', prompt: "Read the clock! What time does the short pink hand point to?", voice: "Look at the analog clock! What time does it show?", praise: "Nice reading! The clock shows 1 o'clock!" },
+          { id: 'clock_2', hour: 2, visual: '🕑', label: "2:00 (2 O'Clock)", sub: 'Play & Art Time', prompt: "Look at the pink hour hand! What o'clock is shown?", voice: "Read the clock! What hour is shown?", praise: "Awesome! It is 2 o'clock!" },
           { id: 'clock_3', hour: 3, visual: '🕒', label: "3:00 (3 O'Clock)", sub: 'Afternoon Snack', prompt: "Read the clock! What time does the short pink hand point to?", voice: "Look at the analog clock! What time does it show?", praise: "Spot on! The clock shows 3 o'clock!" },
+          { id: 'clock_4', hour: 4, visual: '🕓', label: "4:00 (4 O'Clock)", sub: 'Outdoor Play', prompt: "Look closely at the pink hand! Which time matches?", voice: "What hour does this analog clock show?", praise: "Great! It is 4 o'clock!" },
           { id: 'clock_6', hour: 6, visual: '🕕', label: "6:00 (6 O'Clock)", sub: 'Evening Time', prompt: "Read the clock! What hour does this clock show?", voice: "Look closely at the pink hour hand! What time is shown?", praise: "Excellent! It is 6 o'clock!" },
+          { id: 'clock_7', hour: 7, visual: '🕖', label: "7:00 (7 O'Clock)", sub: 'Dinner & Evening', prompt: "Read the clock! Which evening hour does the pink hand point to?", voice: "What time does the clock show?", praise: "Well done! 7 o'clock!" },
           { id: 'clock_9', hour: 9, visual: '🕘', label: "9:00 (9 O'Clock)", sub: 'School Morning', prompt: "Look at the analog clock face! Which time matches?", voice: "What time does this analog clock show?", praise: "Sharp eyes! It is 9 o'clock!" },
+          { id: 'clock_10', hour: 10, visual: '🕙', label: "10:00 (10 O'Clock)", sub: 'Morning Class', prompt: "Check the short pink hour hand! What time is on this clock?", voice: "Look at the clock hands! What o'clock is it?", praise: "Right on time! 10 o'clock!" },
           { id: 'clock_12', hour: 12, visual: '🕛', label: "12:00 (12 O'Clock)", sub: 'Noon Lunch', prompt: "Both clock hands point straight up! What time is it?", voice: "Both hands point straight up to the top! What time is it?", praise: "Wonderful! That is 12 o'clock noon!" }
         ]
       };

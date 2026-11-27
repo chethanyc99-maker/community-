@@ -11,11 +11,16 @@ class CountingModule {
     this.startTime = 0;
 
     this.tasks = [
-      { count: 3, itemEmoji: "🍎", name: "Apples", prompt: "Count the sweet red apples in the basket!" },
-      { count: 5, itemEmoji: "⭐", name: "Stars", prompt: "Touch each star to count how many there are!" },
+      { count: 1, itemEmoji: "☀️", name: "Bright Sun", prompt: "How many bright suns shine in the sky?" },
       { count: 2, itemEmoji: "🚗", name: "Toy Cars", prompt: "How many toy cars do you see?" },
+      { count: 3, itemEmoji: "🍎", name: "Apples", prompt: "Count the sweet red apples in the basket!" },
       { count: 4, itemEmoji: "🎈", name: "Balloons", prompt: "Let's count the colorful balloons!" },
-      { count: 6, itemEmoji: "🦆", name: "Rubber Ducks", prompt: "Count all the happy little ducks!" }
+      { count: 5, itemEmoji: "⭐", name: "Stars", prompt: "Touch each star to count how many there are!" },
+      { count: 6, itemEmoji: "🦆", name: "Rubber Ducks", prompt: "Count all the happy little ducks!" },
+      { count: 7, itemEmoji: "🦋", name: "Butterflies", prompt: "Touch each butterfly fluttering gently!" },
+      { count: 8, itemEmoji: "🍓", name: "Strawberries", prompt: "Count every juicy red strawberry in the tray!" },
+      { count: 9, itemEmoji: "🌻", name: "Sunflowers", prompt: "Count all the golden sunflowers one by one!" },
+      { count: 10, itemEmoji: "🍪", name: "Cookies", prompt: "Count all ten yummy cookies on the plate!" }
     ];
   }
 
@@ -50,9 +55,9 @@ class CountingModule {
 
       <p style="text-align:center; color: var(--text-muted); margin-top: 0.5rem;">Touch each item, then tap the matching number below:</p>
 
-      <div class="number-keypad" role="group" aria-label="Number answers" style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1.25rem;">
-        ${[1, 2, 3, 4, 5, 6, 7].map(n => `
-          <button class="keypad-btn keypad-glass-btn glass-button" data-num="${n}" aria-label="Number ${n}" style="width:74px; height:74px; font-size:2rem; font-weight:800; cursor:pointer;">${n}</button>
+      <div class="number-keypad" role="group" aria-label="Number answers" style="display:flex; justify-content:center; gap:0.85rem; flex-wrap:wrap; margin-top:1.25rem;">
+        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `
+          <button class="keypad-btn keypad-glass-btn glass-button" data-num="${n}" aria-label="Number ${n}" style="width:68px; height:68px; font-size:1.85rem; font-weight:800; cursor:pointer;">${n}</button>
         `).join('')}
       </div>
     `;

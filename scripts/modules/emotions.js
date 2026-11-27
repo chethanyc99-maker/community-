@@ -53,6 +53,72 @@ class EmotionsModule {
           { id: "sad", visual: "😢", label: "Sad / Needing a hug" },
           { id: "proud", visual: "😎", label: "Proud" }
         ]
+      },
+      {
+        scenario: "Wow! A rainbow appeared right outside the window! 🌈",
+        speech: "You see something unexpected and wonderful. Which face looks Surprised?",
+        targetId: "surprised",
+        items: [
+          { id: "surprised", visual: "😲", label: "Surprised" },
+          { id: "sleepy", visual: "😴", label: "Sleepy" },
+          { id: "angry", visual: "😠", label: "Angry" },
+          { id: "sad", visual: "😢", label: "Sad" }
+        ]
+      },
+      {
+        scenario: "Meera finished her puzzle all by herself! How does she feel? 🏆",
+        speech: "Meera worked hard and solved a tough puzzle! Which face shows Proud?",
+        targetId: "proud",
+        items: [
+          { id: "scared", visual: "😨", label: "Scared" },
+          { id: "proud", visual: "😎", label: "Proud & Confident" },
+          { id: "sad", visual: "🙁", label: "Down" },
+          { id: "sleepy", visual: "🥱", label: "Yawning" }
+        ]
+      },
+      {
+        scenario: "It is late at night after a long day of play. Who is SLEEPY? 🌙",
+        speech: "Which face shows feeling tired and ready for bedtime?",
+        targetId: "sleepy",
+        items: [
+          { id: "sleepy", visual: "😴", label: "Sleepy & Tired" },
+          { id: "excited", visual: "🥳", label: "Excited" },
+          { id: "angry", visual: "😡", label: "Mad" },
+          { id: "laugh", visual: "😄", label: "Full of Energy" }
+        ]
+      },
+      {
+        scenario: "Thunder goes BOOM outside during a storm. Who feels SCARED? ⛈️",
+        speech: "Loud sudden thunder sounds can feel startling. Which face looks Scared?",
+        targetId: "scared",
+        items: [
+          { id: "calm", visual: "😌", label: "Calm" },
+          { id: "scared", visual: "😨", label: "Scared" },
+          { id: "proud", visual: "😎", label: "Cool" },
+          { id: "happy", visual: "😊", label: "Smiling" }
+        ]
+      },
+      {
+        scenario: "It is your first day meeting a new group. Who feels SHY? 🌸",
+        speech: "Sometimes meeting new people makes our cheeks warm. Which face feels Shy?",
+        targetId: "shy",
+        items: [
+          { id: "shy", visual: "😊", label: "A Little Shy" },
+          { id: "angry", visual: "🤬", label: "Very Mad" },
+          { id: "sleepy", visual: "😴", label: "Fast Asleep" },
+          { id: "sick", visual: "🤒", label: "Unwell" }
+        ]
+      },
+      {
+        scenario: "Giving a friend a warm hug when they feel sad shows what? 🤗",
+        speech: "Find the friendly Caring and Kind face!",
+        targetId: "caring",
+        items: [
+          { id: "caring", visual: "🤗", label: "Warm & Caring" },
+          { id: "angry", visual: "😤", label: "Grumpy" },
+          { id: "scared", visual: "😱", label: "Frightened" },
+          { id: "bored", visual: "😑", label: "Bored" }
+        ]
       }
     ];
   }

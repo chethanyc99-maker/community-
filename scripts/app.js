@@ -879,6 +879,13 @@ class AppController {
         }
       }
 
+      this.activeDashTab = 'activities';
+      document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(b => {
+        const isAct = b.getAttribute('data-dash-tab') === 'activities';
+        b.classList.toggle('active', isAct);
+        b.setAttribute('aria-selected', isAct ? 'true' : 'false');
+      });
+      this.syncHomeSectionVisibility('activities');
       const cachedDash = window.iepStorage.getDashboardState();
       this.syncStudentDashboardUI(cachedDash);
       if (window.location.protocol.startsWith('http')) {
@@ -1679,7 +1686,7 @@ class AppController {
   /* =========================================================================
      Student Game Navigation
      ========================================================================= */
-  showHomeView() {
+  showHomeView(options = {}) {
     if (this.currentModuleKey === 'calming' && window.calmingModule) {
       window.calmingModule.destroy();
     }
@@ -1694,10 +1701,16 @@ class AppController {
       this.closeNavDrawer();
     }
 
-    const profile = this.previewStudentProfile || window.iepStorage.getProfile();
-    setTimeout(() => {
-      window.speechAssistant?.speak(`Hello ${profile.name}! Pick an activity to play.`);
-    }, 400);
+    if (!options.preserveDashTab) {
+      this.setDashboardTab('activities');
+    }
+
+    if (!options.silentSpeech) {
+      const profile = this.previewStudentProfile || window.iepStorage.getProfile();
+      setTimeout(() => {
+        window.speechAssistant?.speak(`Hello ${profile.name}! Pick an activity to play.`);
+      }, 400);
+    }
   }
 
   openModule(moduleKey) {
@@ -1979,26 +1992,13 @@ class AppController {
     document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-dash-tab');
-        this.activeDashTab = tab;
-        document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(b => {
-          const isActive = b.getAttribute('data-dash-tab') === tab;
-          b.classList.toggle('active', isActive);
-          b.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
         window.soundFx?.playPop();
         // Automatically close the menu drawer whenever user clicks a section
         if (typeof this.closeNavDrawer === 'function') {
           this.closeNavDrawer();
         }
-        if (tab === 'playground') {
-          this.openModule('playground');
-          return;
-        }
-        if (this.currentView !== 'home' && tab !== 'teacher') {
-          this.showHomeView();
-        }
-        this.renderDashboardFeaturePanel(tab);
-        this.filterLearningCards();
+        if (tab === 'teacher') return;
+        this.setDashboardTab(tab, { ensureHomeView: true, scrollTop: true });
       });
     });
 
@@ -2023,17 +2023,56 @@ class AppController {
     });
 
     document.getElementById('btn-show-all-activities')?.addEventListener('click', () => {
-      this.activeDashTab = 'activities';
       this.activeCategory = 'all';
-      document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-dash-tab') === 'activities');
-      });
       document.querySelectorAll('.cat-pill').forEach(p => {
         p.classList.toggle('active', p.getAttribute('data-cat') === 'all');
       });
-      this.renderDashboardFeaturePanel('activities');
-      this.filterLearningCards();
+      this.setDashboardTab('activities', { scrollTop: true });
     });
+  }
+
+  /** Toggle visibility of home welcome/categories vs active drawer section. */
+  syncHomeSectionVisibility(tab = this.activeDashTab) {
+    const currentTab = tab || 'activities';
+    const isActivities = currentTab === 'activities';
+    const isFavorites = currentTab === 'favorites';
+
+    document.querySelector('#view-home .welcome-banner')?.classList.toggle('hidden', !isActivities);
+    document.querySelector('#view-home .learning-categories-header')?.classList.toggle('hidden', !isActivities);
+    document.getElementById('category-filter-row')?.classList.toggle('hidden', !isActivities);
+    document.getElementById('learning-cards-grid')?.classList.toggle('hidden', !(isActivities || isFavorites));
+  }
+
+  /** Activate a student navigation drawer section exclusively. */
+  setDashboardTab(tab = 'activities', options = {}) {
+    const targetTab = tab || 'activities';
+    this.activeDashTab = targetTab;
+
+    document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(b => {
+      const isActive = b.getAttribute('data-dash-tab') === targetTab;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    if (targetTab === 'playground') {
+      this.openModule('playground');
+      return;
+    }
+
+    if (options.ensureHomeView && this.viewHome?.classList.contains('hidden') && targetTab !== 'teacher') {
+      this.showHomeView({ preserveDashTab: true, silentSpeech: true });
+    }
+
+    this.syncHomeSectionVisibility(targetTab);
+    this.renderDashboardFeaturePanel(targetTab);
+    this.filterLearningCards();
+
+    if (targetTab === 'activities') {
+      window.requestAnimationFrame(() => window.refreshLiquidGlassToggleBars?.());
+    }
+    if (options.scrollTop) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   syncStudentDashboardUI(state) {
@@ -2073,6 +2112,7 @@ class AppController {
 
     // Update top header Accessibility toggles visual state
     document.getElementById('btn-toggle-tts')?.classList.toggle('active', settings.voiceEnabled !== false);
+    window.refreshLiquidGlassToggleBars?.();
 
     // Update Quick Stats & Stars
     const starEl = document.getElementById('star-count');
@@ -2083,6 +2123,8 @@ class AppController {
     if (scoreEl) scoreEl.textContent = state.score || 0;
     if (streakEl) streakEl.textContent = state.daily_streak || 0;
     if (rewardDot) rewardDot.classList.toggle('hidden', Boolean(state.reward_claimed_today));
+    const mobileRewardDot = document.getElementById('mobile-reward-dot');
+    if (mobileRewardDot) mobileRewardDot.classList.toggle('hidden', Boolean(state.reward_claimed_today));
 
     // Sync Student Hero Profile Summary Card
     const progress = state.progress || {};
@@ -2120,8 +2162,9 @@ class AppController {
       }
     });
 
+    this.syncHomeSectionVisibility(this.activeDashTab);
     this.filterLearningCards();
-    if (this.activeDashTab && !['activities', 'favorites'].includes(this.activeDashTab)) {
+    if (this.activeDashTab && this.activeDashTab !== 'activities') {
       this.renderDashboardFeaturePanel(this.activeDashTab);
     }
   }
@@ -2129,18 +2172,25 @@ class AppController {
   filterLearningCards() {
     const state = window.iepStorage.getDashboardState();
     const favorites = Array.isArray(state.favorites) ? state.favorites : [];
-    const onlyFavs = this.activeDashTab === 'favorites';
+    const currentTab = this.activeDashTab || 'activities';
+    const isActivities = currentTab === 'activities';
+    const onlyFavs = currentTab === 'favorites';
 
     let visibleCount = 0;
     document.querySelectorAll('.activity-card').forEach(card => {
       const modKey = card.getAttribute('data-module');
       const cat = card.getAttribute('data-category');
-      const matchesCat = this.activeCategory === 'all' || cat === this.activeCategory;
+      const matchesCat = onlyFavs || this.activeCategory === 'all' || cat === this.activeCategory;
       const matchesFav = !onlyFavs || favorites.includes(modKey);
-      const show = matchesCat && matchesFav;
+      const show = (isActivities || onlyFavs) && matchesCat && matchesFav;
       card.classList.toggle('hidden', !show);
       if (show) visibleCount += 1;
     });
+
+    const gridEl = document.getElementById('learning-cards-grid');
+    if (gridEl) {
+      gridEl.classList.toggle('hidden', !(isActivities || (onlyFavs && visibleCount > 0)));
+    }
 
     const emptyNotice = document.getElementById('favorites-empty-notice');
     if (emptyNotice) {
@@ -2152,7 +2202,7 @@ class AppController {
     const panel = document.getElementById('dash-feature-panel');
     if (!panel) return;
 
-    if (tab === 'activities' || tab === 'favorites') {
+    if (tab === 'activities') {
       panel.classList.add('hidden');
       panel.innerHTML = '';
       return;
@@ -2161,7 +2211,14 @@ class AppController {
     const state = window.iepStorage.getDashboardState();
     panel.classList.remove('hidden');
 
-    if (tab === 'profile') {
+    if (tab === 'favorites') {
+      panel.innerHTML = `
+        <div class="dash-panel-header" style="margin-bottom:0;">
+          <h3 class="dash-panel-title">💖 My Favorite Activities</h3>
+          <button type="button" class="btn btn-secondary btn-sm liquid-btn liquid-btn-secondary liquid-btn-sm btn-close-dash-panel">✖ Close</button>
+        </div>
+      `;
+    } else if (tab === 'profile') {
       const profile = this.previewStudentProfile || window.iepStorage.getProfile();
       const session = this.authenticatedUser || window.iepStorage.getActiveSession() || {};
       const summary = state.summary || {};
@@ -2437,6 +2494,17 @@ class AppController {
       const diff = state.difficulty || window.iepStorage.getDifficultyLevel();
       const rate = s.voiceRate || 0.85;
       const textSize = s.textSize || 'normal';
+      const renderLiquidGlassSwitch = (id, isChecked, labelText) => `
+        <label class="lg-switch-row" for="${id}">
+          <span class="lg-switch-caption">${labelText}</span>
+          <span class="lg-switch">
+            <input type="checkbox" id="${id}" class="lg-switch-input" role="switch" ${isChecked ? 'checked' : ''}>
+            <span class="lg-switch-track" aria-hidden="true">
+              <span class="lg-switch-thumb"></span>
+            </span>
+          </span>
+        </label>
+      `;
 
       panel.innerHTML = `
         <div class="dash-panel-header">
@@ -2474,35 +2542,21 @@ class AppController {
 
           <div class="a11y-card glass-card">
             <strong>🌙 Theme & Typography</strong>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-contrast" ${s.highContrast || s.darkMode || document.body.classList.contains('theme-dark') ? 'checked' : ''} style="width:20px; height:20px;"> 🌙 Dark Theme (Apollo Slate)
-            </label>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-dyslexic" ${s.dyslexicFont ? 'checked' : ''} style="width:20px; height:20px;"> Dyslexia-Friendly Font
-            </label>
+            ${renderLiquidGlassSwitch('chk-a11y-contrast', Boolean(s.highContrast || s.darkMode || document.body.classList.contains('theme-dark')), '🌙 Dark Theme (Apollo Slate)')}
+            ${renderLiquidGlassSwitch('chk-a11y-dyslexic', Boolean(s.dyslexicFont), 'Dyslexia-Friendly Font')}
           </div>
 
           <div class="a11y-card glass-card">
             <strong>🎧 Audio & Calm Motion</strong>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-voice" ${s.voiceEnabled !== false ? 'checked' : ''} style="width:20px; height:20px;"> Spoken Voice Guide
-            </label>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-sound" ${s.soundEnabled !== false ? 'checked' : ''} style="width:20px; height:20px;"> Gentle Sound Effects
-            </label>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-motion" ${s.reducedMotion ? 'checked' : ''} style="width:20px; height:20px;"> Reduce Animations
-            </label>
+            ${renderLiquidGlassSwitch('chk-a11y-voice', s.voiceEnabled !== false, 'Spoken Voice Guide')}
+            ${renderLiquidGlassSwitch('chk-a11y-sound', s.soundEnabled !== false, 'Gentle Sound Effects')}
+            ${renderLiquidGlassSwitch('chk-a11y-motion', Boolean(s.reducedMotion), 'Reduce Animations')}
           </div>
 
           <div class="a11y-card glass-card">
             <strong>🕹️ Assistive Motor Access</strong>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-switch-scan" ${window.assistiveAccess?.isSwitchScanning ? 'checked' : ''} style="width:20px; height:20px;"> Single-Switch Auto Scan (Spacebar)
-            </label>
-            <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer;">
-              <input type="checkbox" id="chk-a11y-dwell-click" ${window.assistiveAccess?.isDwellEnabled ? 'checked' : ''} style="width:20px; height:20px;"> Eye-Tracking / Dwell Click (1.5s Hover)
-            </label>
+            ${renderLiquidGlassSwitch('chk-a11y-switch-scan', Boolean(window.assistiveAccess?.isSwitchScanning), 'Single-Switch Auto Scan (Spacebar)')}
+            ${renderLiquidGlassSwitch('chk-a11y-dwell-click', Boolean(window.assistiveAccess?.isDwellEnabled), 'Eye-Tracking / Dwell Click (1.5s Hover)')}
           </div>
         </div>
       `;
@@ -2555,12 +2609,7 @@ class AppController {
     }
 
     panel.querySelector('.btn-close-dash-panel')?.addEventListener('click', () => {
-      this.activeDashTab = 'activities';
-      document.querySelectorAll('.dash-feature-btn[data-dash-tab]').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-dash-tab') === 'activities');
-      });
-      panel.classList.add('hidden');
-      this.filterLearningCards();
+      this.setDashboardTab('activities', { scrollTop: true });
     });
   }
 
